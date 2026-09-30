@@ -43,7 +43,8 @@
   Component-library tokens (shadcn names) derived from the stage tokens, so components written for
   a shadcn app render on any slide and follow its theme. Plus the dq-agents accent colours.
 */
-:root {
+/* On the stage itself, so they recompute from that stage's theme (custom properties resolve where they are defined). */
+:root, .sn-stage {
   --background: var(--sn-bg);
   --foreground: var(--sn-fg);
   --card: color-mix(in oklch, var(--sn-fg) 4%, var(--sn-bg));

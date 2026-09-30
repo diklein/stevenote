@@ -10,9 +10,11 @@ export type SlideContextValue = {
   /** True inside the notes window's thumbnails. Effects, autoplay and fetches should stay quiet. */
   preview: boolean;
   index: number;
+  /** Dim everything on the slide except the element marked data-focus-target. */
+  setFocus: (on: boolean) => void;
 };
 
-export const SlideContext = createContext<SlideContextValue>({ active: true, preview: false, index: 0 });
+export const SlideContext = createContext<SlideContextValue>({ active: true, preview: false, index: 0, setFocus: () => {} });
 
 export function useSlide() {
   return useContext(SlideContext);

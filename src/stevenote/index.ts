@@ -5,5 +5,7 @@ export { useSlide, useDeck } from "./context";
 export { useStep, useStepSpan, useCurrentStep, StepProvider } from "./steps";
 export { Step, Steps, useStepState, Morph, Statement, Stat, useCountUp, Evidence, LiveFrame, Columns, Card, Media } from "./layouts";
 export { Video } from "./video";
+export { Live } from "./live";
+export { runTransition } from "./transitions";
 export type { DeckDef, SlideDef, SlideNotes, DeckState, Theme, TransitionName } from "./types";
 export { TRANSITIONS } from "./types";

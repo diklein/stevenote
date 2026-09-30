@@ -1,14 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { commandForKey, targetOwnsKey } from "./keyboard";
 import { Stage } from "./stage";
 import { clamp, formatHash, parseHash } from "./state";
 import { openChannel, readSnapshot, writeSnapshot, type NavAction, type SyncMessage } from "./sync";
+import { runTransition, type Direction } from "./transitions";
 import { initialState, type DeckDef, type DeckState, type TransitionName } from "./types";
-
-type Direction = "forward" | "back";
 
 /**
  * The deck. Owns state, the URL hash, the keyboard, the notes-window channel and slide transitions.
@@ -23,12 +21,30 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [hurry, setHurry] = useState(false);
   const [jump, setJump] = useState<string | null>(null);
   const [cursorHidden, setCursorHidden] = useState(false);
+  const [alerts, setAlerts] = useState<Record<number, string>>({});
+  const alertsRef = useRef(alerts);
   const stateRef = useRef(state);
   const countsRef = useRef(stepCounts);
   useLayoutEffect(() => {
     stateRef.current = state;
     countsRef.current = stepCounts;
-  }, [state, stepCounts]);
+    alertsRef.current = alerts;
+  }, [state, stepCounts, alerts]);
+
+  // Live components raise alerts (backup video on, health check failed); the notes window shows them.
+  useEffect(() => {
+    const onAlert = (e: Event) => {
+      const { slide, message } = (e as CustomEvent<{ slide: number; message: string | null }>).detail;
+      setAlerts((a) => {
+        const next = { ...a };
+        if (message) next[slide] = message;
+        else delete next[slide];
+        return next;
+      });
+    };
+    window.addEventListener("stevenote:alert", onAlert);
+    return () => window.removeEventListener("stevenote:alert", onAlert);
+  }, []);
   const seq = useRef(0);
   const startedAt = useRef<number | null>(null);
   const channel = useRef<BroadcastChannel | null>(null);
@@ -60,17 +76,9 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         else window.history.replaceState(null, "", hash);
       };
 
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
-      if (slideChanged && doc.startViewTransition && !reduced && document.visibilityState === "visible") {
+      if (slideChanged) {
         const name: TransitionName = deck.slides[next.slide].transition ?? deck.transition ?? "fade";
-        document.documentElement.dataset.snTransition = name;
-        document.documentElement.dataset.snDirection = direction;
-        const vt = doc.startViewTransition(() => flushSync(commit));
-        vt.finished.finally(() => {
-          delete document.documentElement.dataset.snTransition;
-          delete document.documentElement.dataset.snDirection;
-        });
+        runTransition(name, direction, commit);
       } else {
         commit();
       }
@@ -140,7 +148,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   /* ---- notes window channel ---- */
   const broadcast = useCallback(() => {
-    const msg: SyncMessage = { type: "state", state: stateRef.current, stepCounts: countsRef.current, seq: ++seq.current, startedAt: startedAt.current };
+    const msg: SyncMessage = { type: "state", state: stateRef.current, stepCounts: countsRef.current, seq: ++seq.current, startedAt: startedAt.current, alerts: alertsRef.current };
     channel.current?.postMessage(msg);
     writeSnapshot(deck.id, { state: msg.state, stepCounts: msg.stepCounts, seq: msg.seq, startedAt: msg.startedAt });
   }, [deck.id]);
@@ -168,7 +176,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   useEffect(() => {
     if (startedAt.current === null && (state.slide > 0 || state.step > 0)) startedAt.current = Date.now();
     broadcast();
-  }, [state, stepCounts, broadcast]);
+  }, [state, stepCounts, alerts, broadcast]);
 
   /* ---- keyboard ---- */
   const openNotes = useCallback(() => {
@@ -227,6 +235,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return setHurry((v) => !v);
         case "jumpStart":
           return setJump("");
+        case "backup":
+          return window.dispatchEvent(new CustomEvent("stevenote:toggle-backup"));
         case "escape":
           if (help) return setHelp(false);
           if (stateRef.current.blank) return apply({ ...stateRef.current, blank: null });
@@ -278,6 +288,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           <div><kbd>S</kbd> notes window <kbd>F</kbd> fullscreen</div>
           <div><kbd>G</kbd> then a number then Enter to jump</div>
           <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
+          <div><kbd>X</kbd> swap a live component for its backup video</div>
           <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
         </div>
       )}

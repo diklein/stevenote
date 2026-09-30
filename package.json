@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/ensure-private.mjs",
+    "link-private": "node scripts/link-private.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

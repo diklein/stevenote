@@ -35,3 +35,6 @@ node_modules
 .next
 out
 private
+
+# private deck content is mounted here by scripts/link-private.mjs
+src/private

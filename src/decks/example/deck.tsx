@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Columns, LiveFrame, Morph, Stat, Statement, Step, Steps, Video, type DeckDef } from "@/stevenote";
+import { Card, Columns, Live, LiveFrame, Morph, Stat, Statement, Step, Steps, Video, type DeckDef } from "@/stevenote";
+import { ServerClock } from "./server-clock";
 
 function Playground() {
   const [n, setN] = useState(350);
@@ -102,6 +103,26 @@ export const example: DeckDef = {
       content: (
         <LiveFrame title="A live component keeps its own keyboard." subtitle="Space on a focused button clicks the button. Everywhere else it advances.">
           <Playground />
+        </LiveFrame>
+      ),
+    },
+    {
+      id: "backup",
+      title: "A live component with a backup video",
+      notes: {
+        say: "Anything that talks to a server has a recording standing behind it. If the component throws, or its health check fails when the slide opens, the recording takes over and the notes window says so. X swaps by hand.",
+        do: "Click Break it. Then press X twice.",
+        time: 40,
+      },
+      content: (
+        <LiveFrame title="Every live component has a recording behind it." subtitle="Break it swaps to the backup. X swaps back.">
+          <Live
+            label="server clock"
+            backup={{ src: "/example/clock.mp4", poster: "/example/clock.jpg" }}
+            check={() => fetch("/api/example/time", { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(`server answered ${r.status}`); })}
+          >
+            <ServerClock />
+          </Live>
         </LiveFrame>
       ),
     },

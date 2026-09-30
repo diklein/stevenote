@@ -97,6 +97,15 @@ body {
 .sn-slide > .sn-slide-inner { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
 .sn-slide > .sn-slide-inner > * { min-height: 0; }
 
+/* focus: while a video plays, everything outside the focus target dims */
+.sn-stage .sn-slide-inner :is(h1, h2, h3, p, li, figcaption, [data-dim]) { transition: opacity 500ms var(--sn-ease-out); }
+.sn-slide[data-focus="true"] .sn-slide-inner :is(h1, h2, h3, p, li, figcaption, [data-dim]):not([data-focus-target] *) { opacity: 0.28; }
+
+/* embedded stage, for the system page */
+.sn-viewport[data-embedded] { position: relative; inset: auto; width: 100%; aspect-ratio: 16 / 9; border-radius: 0.75rem; overflow: hidden; }
+.sn-viewport[data-embedded] .sn-stage { width: 100%; }
+.sn-viewport[data-embedded]:not([data-animate]) .sn-stage, .sn-viewport[data-embedded]:not([data-animate]) .sn-slide, .sn-viewport[data-preview] .sn-stage, .sn-viewport[data-preview] .sn-slide { view-transition-name: none; }
+
 /* typography inside the stage */
 .sn-stage h1, .sn-stage h2, .sn-stage h3 { font-family: var(--sn-font-display); text-wrap: balance; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
 .sn-stage p, .sn-stage li, .sn-stage dd, .sn-stage dt, .sn-stage blockquote, .sn-stage figcaption { text-wrap: pretty; margin: 0; }

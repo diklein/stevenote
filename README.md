@@ -55,6 +55,42 @@ Tokens: override per slide with `style={{ "--sn-bg": "oklch(35% 0.12 260)" }}`. 
 
 Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per click). Slides marked `skippable` are hidden in hurry mode; slides marked `bonus` sit after the end for questions.
 
+## Live components and backup videos
+
+Anything that talks to a server goes inside `<Live>` with a recording behind it:
+
+```tsx
+<Live label="gateway demo" backup={{ src: "/decks/talk/gateway.mp4", poster: "/decks/talk/gateway.jpg" }} check={() => fetch("/api/private/health").then((r) => { if (!r.ok) throw new Error("gateway down"); })}>
+  <GatewayDemo />
+</Live>
+```
+
+The backup takes over when the component throws, when `check` rejects as the slide opens, or when you press `X`. Every switch shows in the notes window. Record the backup against the real servers with:
+
+```
+scripts/record-backup.sh "http://localhost:3000/decks/talk#/12" public/decks/talk/gateway.mp4
+```
+
+It opens the slide fullscreen in a clean Chrome, counts down, records the screen at 60 fps while you run the demo, stops on Enter, crops to the stage and writes the mp4 and a poster.
+
+While a video plays, everything else on the slide dims to 28 percent, so the eye goes to the moving picture. Turn it off per video with `dimWhilePlaying={false}`.
+
+## Private decks
+
+Deck content and the server routes it needs live in a separate private repo with this shape:
+
+```
+src/decks.ts        export const privateDecks: Record<string, DeckDef>
+src/api.ts          export const privateRoutes: Record<string, { GET?, POST? }>   served at /api/private/<path>
+src/<deck>/...      slides, components, notes
+```
+
+Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `src/private`). Secrets go in `.env.local`. Without a private repo the app builds with stubs.
+
+## Design system
+
+`/system` renders the type scale, colour tokens, every transition and every step effect with the deck engine itself.
+
 ## Keys
 
 | Key | Does |
@@ -67,6 +103,7 @@ Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per c
 | F | fullscreen |
 | G, digits, Enter | jump to a slide |
 | minus | hurry mode (skips `skippable` slides) |
+| X | swap a live component for its backup video |
 | ? | help |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.

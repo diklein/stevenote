@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, type CSSProperties } from "react";
+import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { DeckContext, SlideContext } from "./context";
 import { StepProvider } from "./steps";
 import type { DeckDef, DeckState } from "./types";
@@ -17,6 +17,8 @@ export function Stage({
   onStepCount,
   preview = false,
   chrome = false,
+  embedded = false,
+  animate = false,
   children,
 }: {
   deck: DeckDef;
@@ -25,6 +27,10 @@ export function Stage({
   onStepCount?: (slide: number, count: number) => void;
   preview?: boolean;
   chrome?: boolean;
+  /** Render inside the page flow instead of filling the viewport. */
+  embedded?: boolean;
+  /** Keep view-transition names on an embedded stage (only one per document may). */
+  animate?: boolean;
   children?: React.ReactNode;
 }) {
   const current = deck.slides[state.slide];
@@ -34,7 +40,7 @@ export function Stage({
 
   return (
     <DeckContext.Provider value={{ deck, state, stepCounts }}>
-      <div className="sn-viewport" data-preview={preview || undefined}>
+      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined}>
         <div className="sn-stage" data-theme={theme} data-chrome={chrome || undefined} style={style}>
           {window.map((i) => {
             const slide = deck.slides[i];
@@ -78,9 +84,11 @@ function SlideFrame({
   children: React.ReactNode;
 }) {
   const onCount = useCallback((count: number) => onStepCount?.(index, count), [index, onStepCount]);
+  const [focus, setFocus] = useState(false);
+  const ctx = useMemo(() => ({ active, preview, index, setFocus }), [active, preview, index]);
   return (
-    <SlideContext.Provider value={{ active, preview, index }}>
-      <section className="sn-slide" data-active={active} data-index={index} inert={!active || preview} aria-hidden={!active}>
+    <SlideContext.Provider value={ctx}>
+      <section className="sn-slide" data-active={active} data-index={index} data-focus={focus && active ? "true" : undefined} inert={!active || preview} aria-hidden={!active}>
         <div className="sn-slide-inner">
           <StepProvider step={step} onCount={onCount}>
             {children}

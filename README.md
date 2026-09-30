@@ -57,7 +57,7 @@ Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per c
 
 ## The grid
 
-Every slide sits on a twelve-column grid: 5cqi margins, 1.5cqi gutters, and a 1.25cqi baseline. `Grid` and `Col` place content (`<Col span={7}>`, `<Col span={5} start={8}>`); the built-in layouts already use them. Type steps come with line heights that are whole baselines (`--sn-lh-0` to `--sn-lh-6`), and spacing should be in baselines too (`calc(var(--sn-base) * 2)`). Press `⇧G` to see the overlay, or open a deck with `?grid=1`.
+Every slide sits on a twelve-column grid built from one unit, the baseline (1.25cqi): margins of four baselines, gutters of one. Type sizes are whole or half baselines (`--sn-step--1` at 1 to `--sn-step-6` at 10) and line heights are whole baselines, so the type size preference scales the baseline and everything stays aligned. `Grid` and `Col` place content (`<Col span={7}>`, `<Col span={5} start={8}>`); the built-in layouts already use them. Type steps come with line heights that are whole baselines (`--sn-lh-0` to `--sn-lh-6`), and spacing should be in baselines too (`calc(var(--sn-base) * 2)`). Press `⇧G` to see the overlay, or open a deck with `?grid=1`.
 
 ## Live components and backup videos
 

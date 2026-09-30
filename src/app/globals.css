@@ -17,22 +17,25 @@
   --sn-font-text: var(--font-geist-sans), system-ui, sans-serif;
   --sn-font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* type scale in container-inline units: 1cqi = 1% of stage width. --sn-type-scale is a presenter preference. */
+  /*
+    The baseline is the unit. 1.25cqi, scaled by the type-size preference so everything moves together.
+    Type sizes are whole or half baselines; line heights are whole baselines. The grid's margin is
+    four baselines and its gutter one.
+  */
   --sn-type-scale: 1;
-  --sn-step--1: calc(1.5cqi * var(--sn-type-scale));
-  --sn-step-0: calc(1.9cqi * var(--sn-type-scale));
-  --sn-step-1: calc(2.4cqi * var(--sn-type-scale));
-  --sn-step-2: calc(3.1cqi * var(--sn-type-scale));
-  --sn-step-3: calc(4.2cqi * var(--sn-type-scale));
-  --sn-step-4: calc(5.6cqi * var(--sn-type-scale));
-  --sn-step-5: calc(7.4cqi * var(--sn-type-scale));
-  --sn-step-6: calc(12cqi * var(--sn-type-scale));
+  --sn-base: calc(1.25cqi * var(--sn-type-scale));
+  --sn-step--1: calc(var(--sn-base) * 1);
+  --sn-step-0: calc(var(--sn-base) * 1.5);
+  --sn-step-1: calc(var(--sn-base) * 2);
+  --sn-step-2: calc(var(--sn-base) * 2.5);
+  --sn-step-3: calc(var(--sn-base) * 3);
+  --sn-step-4: calc(var(--sn-base) * 4);
+  --sn-step-5: calc(var(--sn-base) * 6);
+  --sn-step-6: calc(var(--sn-base) * 10);
 
-  /* the grid: 12 columns between fixed margins, a gutter, and a baseline every 1.25cqi */
   --sn-cols: 12;
-  --sn-margin: 5cqi;
-  --sn-gutter: 1.5cqi;
-  --sn-base: 1.25cqi;
+  --sn-margin: calc(var(--sn-base) * 4);
+  --sn-gutter: var(--sn-base);
   --sn-col: calc((100cqi - 2 * var(--sn-margin) - (var(--sn-cols) - 1) * var(--sn-gutter)) / var(--sn-cols));
   --sn-pad: var(--sn-margin);
   --sn-gap: var(--sn-gutter);
@@ -45,8 +48,8 @@
   --sn-lh-2: calc(var(--sn-base) * 3);
   --sn-lh-3: calc(var(--sn-base) * 4);
   --sn-lh-4: calc(var(--sn-base) * 5);
-  --sn-lh-5: calc(var(--sn-base) * 6);
-  --sn-lh-6: calc(var(--sn-base) * 10);
+  --sn-lh-5: calc(var(--sn-base) * 7);
+  --sn-lh-6: calc(var(--sn-base) * 11);
 
   --sn-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --sn-duration: 350ms;

@@ -9,7 +9,7 @@ import { Col, Grid, Stage, Step, Statement, runTransition, TRANSITIONS, type Dec
  */
 
 const STEPS = ["--sn-step--1", "--sn-step-0", "--sn-step-1", "--sn-step-2", "--sn-step-3", "--sn-step-4", "--sn-step-5", "--sn-step-6"];
-const STEP_VALUES = ["1.5cqi", "1.9cqi", "2.4cqi", "3.1cqi", "4.2cqi", "5.6cqi", "7.4cqi", "12cqi"];
+const STEP_VALUES = ["1 base", "1.5", "2", "2.5", "3", "4", "6", "10 base"];
 const COLORS: [string, string][] = [
   ["--sn-bg", "background"],
   ["--sn-fg", "foreground"],
@@ -63,7 +63,7 @@ const gridDeck: DeckDef = {
         <Grid fill>
           <Col span={7} align="center">
             <h2 style={{ fontSize: "var(--sn-step-4)", lineHeight: "var(--sn-lh-4)" }}>Twelve columns, one baseline.</h2>
-            <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginTop: "calc(var(--sn-base) * 2)" }}>Margins 5cqi, gutters 1.5cqi, baseline 1.25cqi. Every line height is a whole number of baselines.</p>
+            <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginTop: "calc(var(--sn-base) * 2)" }}>Margin four baselines, gutter one, baseline 1.25cqi. Every size and line height is a number of baselines.</p>
           </Col>
           <Col span={5} align="center">
             <div style={{ border: "1px solid var(--sn-rule)", borderRadius: "var(--sn-radius)", padding: "calc(var(--sn-base) * 2)", fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)" }}>A card in the right five columns, padded in baselines.</div>
@@ -124,11 +124,11 @@ export default function SystemPage() {
       <p style={p}>Tokens, type, motion and builds, rendered by the deck engine itself. Everything is sized in container units, so it holds at any window size.</p>
 
       <h2 style={h2}>Type scale</h2>
-      <p style={p}>Eight steps from 1.5 to 12 percent of the stage width. Headlines use steps 4 and up, semibold, tight tracking, balanced wrapping. Body text is step 0 with pretty wrapping. Geist Sans and Geist Mono.</p>
+      <p style={p}>Eight steps, each a whole or half number of baselines (the baseline is 1.25 percent of the stage width), with line heights that are whole baselines. Headlines use steps 4 and up, semibold, tight tracking, balanced wrapping. Body text is step 0 with pretty wrapping. Geist Sans and Geist Mono.</p>
       <Stage deck={typeDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded />
 
       <h2 style={h2}>Grid</h2>
-      <p style={p}>A strict grid: twelve columns between 5cqi margins with 1.5cqi gutters, and a 1.25cqi baseline. Layouts place content with Grid and Col; type sizes carry line heights that are whole baselines, so text on adjacent columns sits on the same lines. Shift+G in a deck shows the overlay.</p>
+      <p style={p}>A strict grid: twelve columns between margins of four baselines with one-baseline gutters, on a 1.25cqi baseline. Layouts place content with Grid and Col; type sizes carry line heights that are whole baselines, so text on adjacent columns sits on the same lines. Shift+G in a deck shows the overlay.</p>
       <Stage deck={gridDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded prefs={{ transition: "deck", theme: "deck", motion: "auto", dimVideo: true, counter: "hover", hideCursor: true, letterbox: "black", typeScale: 1, hurry: false, reviewFlags: false, gridOverlay: true }} />
 
       <h2 style={h2}>Colour</h2>

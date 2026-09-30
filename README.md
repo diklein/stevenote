@@ -83,6 +83,7 @@ Deck content and the server routes it needs live in a separate private repo with
 src/decks.ts        export const privateDecks: Record<string, DeckDef>
 src/api.ts          export const privateRoutes: Record<string, { GET?, POST? }>   served at /api/private/<path>
 src/<deck>/...      slides, components, notes
+public/...          media, served at /private/<path>
 ```
 
 Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `src/private`). Secrets go in `.env.local`. Without a private repo the app builds with stubs.

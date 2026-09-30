@@ -38,3 +38,4 @@ private
 
 # private deck content is mounted here by scripts/link-private.mjs
 src/private
+public/private

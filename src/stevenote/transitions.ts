@@ -8,9 +8,9 @@ export type Direction = "forward" | "back";
  * ::view-transition-old/new(sn-slide) by the transition name and direction set on <html>.
  * Falls back to a plain update when the API is missing, motion is reduced, or the tab is hidden.
  */
-export function runTransition(name: TransitionName, direction: Direction, commit: () => void) {
+export function runTransition(name: TransitionName, direction: Direction, commit: () => void, motion: "auto" | "full" | "reduced" = "auto") {
   const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduced = motion === "reduced" || (motion === "auto" && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   if (!doc.startViewTransition || reduced || document.visibilityState !== "visible" || name === "cut") {
     commit();
     return;

@@ -37,6 +37,14 @@ export function Live({
   );
 
   useEffect(() => {
+    if (preview || !backup) return;
+    window.dispatchEvent(new CustomEvent("stevenote:backup-available", { detail: { slide: index, available: true } }));
+    return () => {
+      window.dispatchEvent(new CustomEvent("stevenote:backup-available", { detail: { slide: index, available: false } }));
+    };
+  }, [preview, backup, index]);
+
+  useEffect(() => {
     if (!active || preview || !check || mode === "backup") return;
     let cancelled = false;
     check().catch((e: unknown) => {

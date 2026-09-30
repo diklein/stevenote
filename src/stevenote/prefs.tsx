@@ -11,7 +11,7 @@ import { TRANSITIONS, type Theme, type TransitionName } from "./types";
 export type Prefs = {
   transition: "deck" | TransitionName;
   theme: "deck" | Theme;
-  motion: "full" | "reduced";
+  motion: "auto" | "full" | "reduced";
   dimVideo: boolean;
   counter: "hover" | "always" | "never";
   hideCursor: boolean;
@@ -23,7 +23,7 @@ export type Prefs = {
 export const defaultPrefs: Prefs = {
   transition: "deck",
   theme: "deck",
-  motion: "full",
+  motion: "auto",
   dimVideo: true,
   counter: "hover",
   hideCursor: true,
@@ -55,7 +55,7 @@ type Row<K extends keyof Prefs = keyof Prefs> = { key: K; label: string; values:
 export const PREF_ROWS: Row[] = [
   { key: "transition", label: "Transition", values: ["deck", ...TRANSITIONS], show: (v) => (v === "deck" ? "as authored" : String(v)) } as Row<"transition">,
   { key: "theme", label: "Theme", values: ["deck", "light", "dark"], show: (v) => (v === "deck" ? "as authored" : String(v)) } as Row<"theme">,
-  { key: "motion", label: "Motion", values: ["full", "reduced"], show: (v) => (v === "reduced" ? "reduced: 120ms crossfades" : "full") } as Row<"motion">,
+  { key: "motion", label: "Motion", values: ["auto", "full", "reduced"], show: (v) => (v === "reduced" ? "reduced: 120ms crossfades" : v === "full" ? "full, even if the OS says reduce" : "follow the OS setting") } as Row<"motion">,
   { key: "dimVideo", label: "Dim around playing video", values: [true, false], show: (v) => (v ? "on" : "off") } as Row<"dimVideo">,
   { key: "counter", label: "Slide counter", values: ["hover", "always", "never"], show: (v) => String(v) } as Row<"counter">,
   { key: "hideCursor", label: "Hide idle cursor", values: [true, false], show: (v) => (v ? "on" : "off") } as Row<"hideCursor">,

@@ -15,7 +15,7 @@ export type NavAction =
 
 export type SyncMessage =
   | { type: "hello"; from: "notes" | "deck" }
-  | { type: "state"; state: DeckState; stepCounts: Record<number, number>; seq: number; startedAt: number | null; alerts?: Record<number, string> }
+  | { type: "state"; state: DeckState; stepCounts: Record<number, number>; seq: number; startedAt: number | null; alerts?: Record<number, string>; backups?: Record<number, boolean> }
   | { type: "nav"; nav: NavAction }
   | { type: "timer"; startedAt: number | null };
 

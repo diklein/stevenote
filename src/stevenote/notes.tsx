@@ -26,6 +26,7 @@ export function Notes({ deck }: { deck: DeckDef }) {
   });
   const [connected, setConnected] = useState(false);
   const [alerts, setAlerts] = useState<Record<number, string>>({});
+  const [backups, setBackups] = useState<Record<number, boolean>>({});
   const channel = useRef<BroadcastChannel | null>(null);
   const seq = useRef(snap?.seq ?? 0);
 
@@ -54,6 +55,7 @@ export function Notes({ deck }: { deck: DeckDef }) {
         setStepCounts(m.stepCounts);
         setStartedAt(m.startedAt);
         setAlerts(m.alerts ?? {});
+        setBackups(m.backups ?? {});
         setConnected(true);
       } else if (m.type === "hello" && m.from === "deck") {
         ch.postMessage({ type: "hello", from: "notes" } satisfies SyncMessage);
@@ -114,6 +116,7 @@ export function Notes({ deck }: { deck: DeckDef }) {
           {state.slide + 1} / {deck.slides.length}
           {count > 0 && <span style={{ marginLeft: "1em" }}>step {state.step} of {count}</span>}
           {state.blank && <span style={{ marginLeft: "1em", color: "oklch(80% 0.17 60)" }}>BLANKED</span>}
+          {backups[state.slide] && !alerts[state.slide] && <span style={{ marginLeft: "1em", color: "oklch(70% 0.12 150)" }}>backup ready: X</span>}
           {alerts[state.slide] && <span style={{ marginLeft: "1em", color: "oklch(75% 0.18 25)" }}>{alerts[state.slide]}</span>}
           {!connected && <span style={{ marginLeft: "1em", color: "oklch(75% 0.18 25)" }}>waiting for the deck</span>}
         </span>

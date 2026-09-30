@@ -29,14 +29,17 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [cursorHidden, setCursorHidden] = useState(false);
   const [alerts, setAlerts] = useState<Record<number, string>>({});
   const alertsRef = useRef(alerts);
+  const [backups, setBackups] = useState<Record<number, boolean>>({});
+  const backupsRef = useRef(backups);
   const stateRef = useRef(state);
   const countsRef = useRef(stepCounts);
   useLayoutEffect(() => {
     stateRef.current = state;
     countsRef.current = stepCounts;
     alertsRef.current = alerts;
+    backupsRef.current = backups;
     prefsRef.current = prefs;
-  }, [state, stepCounts, alerts, prefs]);
+  }, [state, stepCounts, alerts, backups, prefs]);
 
   // Live components raise alerts (backup video on, health check failed); the notes window shows them.
   useEffect(() => {
@@ -49,8 +52,16 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         return next;
       });
     };
+    const onBackup = (e: Event) => {
+      const { slide, available } = (e as CustomEvent<{ slide: number; available: boolean }>).detail;
+      setBackups((b) => (b[slide] === available ? b : { ...b, [slide]: available }));
+    };
     window.addEventListener("stevenote:alert", onAlert);
-    return () => window.removeEventListener("stevenote:alert", onAlert);
+    window.addEventListener("stevenote:backup-available", onBackup);
+    return () => {
+      window.removeEventListener("stevenote:alert", onAlert);
+      window.removeEventListener("stevenote:backup-available", onBackup);
+    };
   }, []);
   const seq = useRef(0);
   const startedAt = useRef<number | null>(null);
@@ -86,7 +97,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       if (slideChanged) {
         const authored: TransitionName = deck.slides[next.slide].transition ?? deck.transition ?? "fade";
         const name = prefsRef.current.transition === "deck" ? authored : prefsRef.current.transition;
-        runTransition(prefsRef.current.motion === "reduced" ? "fade" : name, direction, commit);
+        runTransition(name, direction, commit, prefsRef.current.motion);
       } else {
         commit();
       }
@@ -156,7 +167,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   /* ---- notes window channel ---- */
   const broadcast = useCallback(() => {
-    const msg: SyncMessage = { type: "state", state: stateRef.current, stepCounts: countsRef.current, seq: ++seq.current, startedAt: startedAt.current, alerts: alertsRef.current };
+    const msg: SyncMessage = { type: "state", state: stateRef.current, stepCounts: countsRef.current, seq: ++seq.current, startedAt: startedAt.current, alerts: alertsRef.current, backups: backupsRef.current };
     channel.current?.postMessage(msg);
     writeSnapshot(deck.id, { state: msg.state, stepCounts: msg.stepCounts, seq: msg.seq, startedAt: msg.startedAt });
   }, [deck.id]);
@@ -184,7 +195,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   useEffect(() => {
     if (startedAt.current === null && (state.slide > 0 || state.step > 0)) startedAt.current = Date.now();
     broadcast();
-  }, [state, stepCounts, alerts, broadcast]);
+  }, [state, stepCounts, alerts, backups, broadcast]);
 
   /* ---- keyboard ---- */
   const openNotes = useCallback(() => {
@@ -327,6 +338,9 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       )}
       {help && !prefsOpen && (
         <div className="sn-help" role="dialog" aria-label="Keyboard shortcuts">
+          <div className="muted" style={{ marginBottom: "0.8cqi", fontSize: "0.85em" }}>
+            View transitions: {"startViewTransition" in document ? "supported" : "not supported in this browser"}. OS reduce motion: {window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "on" : "off"}. Motion preference: {prefs.motion}.
+          </div>
           <div><kbd>→</kbd><kbd>Space</kbd> next step or slide</div>
           <div><kbd>←</kbd><kbd>⇧Space</kbd> back</div>
           <div><kbd>B</kbd><kbd>.</kbd> black <kbd>W</kbd> white</div>

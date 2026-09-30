@@ -149,9 +149,9 @@ Fix: everything mounts at load so the score count-up plays before anyone sees it
 6. **Export and polish.** Print route, overview grid, laser and spotlight, skippable and bonus slides, help overlay, offline check.
 7. **The first real deck**, then the slide about the tool.
 
-## 7. Open questions for Dave
+## 7. Open questions
 
-See the end of the conversation summary; the questions are about deployment privacy for gated case studies, the room (single laptop over Zoom, or a second display), the typeface, the target length, pilot results for the case study, and which video cuts to use.
+The questions were about deployment privacy for gated case studies, the room (single laptop over Zoom, or a second display), the typeface, the target length, pilot results for the case study, and which video cuts to use.
 
 ## Sources
 

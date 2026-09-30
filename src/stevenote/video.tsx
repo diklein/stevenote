@@ -81,8 +81,8 @@ export function Video({
   }, [preview, dimWhilePlaying, setFocus]);
 
   return (
-    <div ref={wrap} style={{ display: "flex", flexDirection: "column", gap: "1.6cqi", height: "100%" }}>
-      {title && <h2 style={{ fontSize: "var(--sn-step-3)" }}>{title}</h2>}
+    <div ref={wrap} style={{ display: "flex", flexDirection: "column", gap: "var(--sn-base)", height: "100%" }}>
+      {title && <h2 style={{ fontSize: "var(--sn-step-3)", lineHeight: "var(--sn-lh-3)" }}>{title}</h2>}
       <div data-focus-target style={{ position: "relative", flex: 1, minHeight: 0, display: "grid", placeItems: "center" }}>
         <video
           ref={ref}
@@ -92,7 +92,7 @@ export function Video({
           playsInline
           loop={loop}
           preload="auto"
-          style={{ maxWidth: "100%", maxHeight: title ? "66cqh" : "84cqh", borderRadius: "var(--sn-radius)", background: "black" }}
+          style={{ maxWidth: "100%", maxHeight: title ? "calc(100cqh - 2 * var(--sn-pad) - var(--sn-lh-3) - var(--sn-base))" : "calc(100cqh - 2 * var(--sn-pad))", borderRadius: "var(--sn-radius)", background: "black" }}
         />
         {showChapter && chapter?.label && (
           <div

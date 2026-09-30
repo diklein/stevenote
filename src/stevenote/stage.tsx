@@ -65,6 +65,7 @@ export function Stage({
               </div>
             </>
           )}
+          {prefs?.gridOverlay && <div className="sn-gridlines" aria-hidden><i /></div>}
           {state.blank && <div className="sn-blank" data-color={state.blank} />}
           {children}
         </div>

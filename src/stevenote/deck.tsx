@@ -21,6 +21,9 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [stepCounts, setStepCounts] = useState<Record<number, number>>({});
   const [help, setHelp] = useState(false);
   const [prefs, setPrefs] = usePrefs();
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("grid") === "1") setPrefs((p) => ({ ...p, gridOverlay: true }));
+  }, [setPrefs]);
   const [prefsOpen, setPrefsOpen] = useState(false);
   const { review, save: saveReview } = useReview(deck.id);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -291,6 +294,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         }
         case "flags":
           return setPrefs((p) => ({ ...p, reviewFlags: !p.reviewFlags }));
+        case "grid":
+          return setPrefs((p) => ({ ...p, gridOverlay: !p.gridOverlay }));
         case "escape":
           if (help) return setHelp(false);
           if (stateRef.current.blank) return apply({ ...stateRef.current, blank: null });
@@ -388,6 +393,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
           <div><kbd>X</kbd> swap a live component for its backup video</div>
           <div><kbd>/</kbd> feedback on this slide <kbd>A</kbd> approve <kbd>⇧A</kbd> show or hide flags</div>
+          <div><kbd>⇧G</kbd> grid overlay</div>
           <div><kbd>,</kbd> preferences</div>
           <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
         </div>

@@ -55,6 +55,10 @@ Tokens: override per slide with `style={{ "--sn-bg": "oklch(35% 0.12 260)" }}`. 
 
 Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per click). Slides marked `skippable` are hidden in hurry mode; slides marked `bonus` sit after the end for questions.
 
+## The grid
+
+Every slide sits on a twelve-column grid: 5cqi margins, 1.5cqi gutters, and a 1.25cqi baseline. `Grid` and `Col` place content (`<Col span={7}>`, `<Col span={5} start={8}>`); the built-in layouts already use them. Type steps come with line heights that are whole baselines (`--sn-lh-0` to `--sn-lh-6`), and spacing should be in baselines too (`calc(var(--sn-base) * 2)`). Press `⇧G` to see the overlay, or open a deck with `?grid=1`.
+
 ## Live components and backup videos
 
 Anything that talks to a server goes inside `<Live>` with a recording behind it:
@@ -111,6 +115,7 @@ Press `/` on any slide for a feedback panel; type, then Esc or ⌘Enter. `A` tog
 | X | swap a live component for its backup video |
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
+| Shift+G | grid overlay |
 | ? | help |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.

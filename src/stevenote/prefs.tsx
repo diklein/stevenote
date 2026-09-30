@@ -19,6 +19,7 @@ export type Prefs = {
   typeScale: 0.9 | 1 | 1.1 | 1.2;
   hurry: boolean;
   reviewFlags: boolean;
+  gridOverlay: boolean;
 };
 
 export const defaultPrefs: Prefs = {
@@ -32,6 +33,7 @@ export const defaultPrefs: Prefs = {
   typeScale: 1,
   hurry: false,
   reviewFlags: true,
+  gridOverlay: false,
 };
 
 const KEY = "stevenote:prefs";
@@ -40,7 +42,7 @@ export function loadPrefs(): Prefs {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultPrefs;
-    return { ...defaultPrefs, ...(JSON.parse(raw) as Partial<Prefs>), hurry: false };
+    return { ...defaultPrefs, ...(JSON.parse(raw) as Partial<Prefs>), hurry: false, gridOverlay: false };
   } catch {
     return defaultPrefs;
   }
@@ -48,7 +50,7 @@ export function loadPrefs(): Prefs {
 
 export function savePrefs(p: Prefs) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ ...p, hurry: undefined }));
+    localStorage.setItem(KEY, JSON.stringify({ ...p, hurry: undefined, gridOverlay: undefined }));
   } catch {}
 }
 
@@ -65,6 +67,7 @@ export const PREF_ROWS: Row[] = [
   { key: "typeScale", label: "Type size", values: [0.9, 1, 1.1, 1.2], show: (v) => `${Math.round(Number(v) * 100)}%` } as Row<"typeScale">,
   { key: "hurry", label: "Hurry mode", values: [false, true], show: (v) => (v ? "on: skipping marked slides" : "off") } as Row<"hurry">,
   { key: "reviewFlags", label: "Review flags", values: [true, false], show: (v) => (v ? "shown" : "hidden") } as Row<"reviewFlags">,
+  { key: "gridOverlay", label: "Grid overlay", values: [false, true], show: (v) => (v ? "shown: 12 columns and the baseline" : "hidden") } as Row<"gridOverlay">,
 ] as Row[];
 
 export function cyclePref(p: Prefs, key: keyof Prefs, dir: 1 | -1): Prefs {

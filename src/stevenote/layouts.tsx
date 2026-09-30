@@ -75,15 +75,37 @@ export function Morph({ name, as: Tag = "div", className, style, children }: { n
   );
 }
 
-/* ---------- layouts ---------- */
+/* ---------- the grid ---------- */
+
+/** The slide's 12-column grid. Children are Cols. `fill` stretches rows to the slide height. */
+export function Grid({ children, fill = false, style, className }: { children: ReactNode; fill?: boolean; style?: CSSProperties; className?: string }) {
+  return (
+    <div className={["sn-grid", className].filter(Boolean).join(" ")} data-fill={fill || undefined} style={style}>
+      {children}
+    </div>
+  );
+}
+
+/** A span of columns. `start` is 1-based. `align` is the vertical alignment within the row. */
+export function Col({ span = 12, start, align, children, style, className }: { span?: number; start?: number; align?: "start" | "center" | "end" | "stretch"; children?: ReactNode; style?: CSSProperties; className?: string }) {
+  return (
+    <div className={className} style={{ gridColumn: start ? `${start} / span ${span}` : `span ${span}`, alignSelf: align, minWidth: 0, minHeight: 0, ...style }}>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- layouts, on the grid ---------- */
 
 export function Statement({ kicker, children, sub, align = "left" }: { kicker?: ReactNode; children: ReactNode; sub?: ReactNode; align?: "left" | "center" }) {
   return (
-    <div style={{ maxWidth: "80cqi", margin: align === "center" ? "0 auto" : undefined, textAlign: align }}>
-      {kicker && <p className="muted" style={{ fontSize: "var(--sn-step-1)", marginBottom: "1.2cqi" }}>{kicker}</p>}
-      <h2 style={{ fontSize: "var(--sn-step-5)" }}>{children}</h2>
-      {sub && <div className="muted" style={{ fontSize: "var(--sn-step-2)", marginTop: "2cqi", maxWidth: "64cqi", marginInline: align === "center" ? "auto" : undefined, lineHeight: 1.35 }}>{sub}</div>}
-    </div>
+    <Grid>
+      <Col span={10} start={align === "center" ? 2 : 1} style={{ textAlign: align }}>
+        {kicker && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginBottom: "var(--sn-base)" }}>{kicker}</p>}
+        <h2 style={{ fontSize: "var(--sn-step-5)", lineHeight: "var(--sn-lh-5)" }}>{children}</h2>
+        {sub && <div className="muted" style={{ fontSize: "var(--sn-step-2)", lineHeight: "var(--sn-lh-2)", marginTop: "calc(var(--sn-base) * 2)", maxWidth: align === "center" ? undefined : "calc(var(--sn-col) * 8 + var(--sn-gutter) * 7)" }}>{sub}</div>}
+      </Col>
+    </Grid>
   );
 }
 
@@ -92,11 +114,13 @@ export function Stat({ value, format, claim, source, duration = 1100 }: { value:
   const shown = useCountUp(value, duration);
   const fmt = format ?? ((n: number) => Math.round(n).toLocaleString());
   return (
-    <div style={{ maxWidth: "84cqi" }}>
-      <div className="tabular" style={{ fontSize: "var(--sn-step-6)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 0.95, fontFamily: "var(--sn-font-display)" }}>{fmt(shown)}</div>
-      <p style={{ fontSize: "var(--sn-step-3)", marginTop: "2cqi", maxWidth: "70cqi", lineHeight: 1.15, fontWeight: 500, letterSpacing: "-0.01em" }}>{claim}</p>
-      {source && <p className="muted" style={{ fontSize: "var(--sn-step-0)", marginTop: "1.6cqi" }}>{source}</p>}
-    </div>
+    <Grid>
+      <Col span={10}>
+        <div className="tabular" style={{ fontSize: "var(--sn-step-6)", lineHeight: "var(--sn-lh-6)", fontWeight: 600, letterSpacing: "-0.04em", fontFamily: "var(--sn-font-display)" }}>{fmt(shown)}</div>
+        <p style={{ fontSize: "var(--sn-step-3)", lineHeight: "var(--sn-lh-3)", marginTop: "var(--sn-base)", fontWeight: 500, letterSpacing: "-0.01em", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{claim}</p>
+        {source && <p className="muted" style={{ fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)", marginTop: "var(--sn-base)" }}>{source}</p>}
+      </Col>
+    </Grid>
   );
 }
 
@@ -124,49 +148,56 @@ function reducedMotion() {
   return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** A headline and one piece of proof. Nothing to read while speaking. */
+/** A headline in the left seven columns and one piece of proof in the right five. */
 export function Evidence({ headline, children, aside }: { headline: ReactNode; children: ReactNode; aside?: ReactNode }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: "var(--sn-gap)", alignItems: "center" }}>
-      <div>
-        <h2 style={{ fontSize: "var(--sn-step-4)" }}>{headline}</h2>
-        {aside && <p className="muted" style={{ fontSize: "var(--sn-step-1)", marginTop: "2cqi", maxWidth: "36cqi" }}>{aside}</p>}
-      </div>
-      <div>{children}</div>
-    </div>
+    <Grid fill>
+      <Col span={7} align="center">
+        <h2 style={{ fontSize: "var(--sn-step-4)", lineHeight: "var(--sn-lh-4)" }}>{headline}</h2>
+        {aside && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginTop: "calc(var(--sn-base) * 2)", maxWidth: "calc(var(--sn-col) * 6 + var(--sn-gutter) * 5)" }}>{aside}</p>}
+      </Col>
+      <Col span={5} align="center">{children}</Col>
+    </Grid>
   );
 }
 
 /** Frames a live component with a sentence that says what the audience is about to watch. */
 export function LiveFrame({ title, subtitle, compact = false, children }: { title: ReactNode; subtitle?: ReactNode; compact?: boolean; children: ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: compact ? "1.2cqi" : "2.4cqi", height: "100%" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: compact ? "var(--sn-base)" : "calc(var(--sn-base) * 2)", height: "100%" }}>
       <div>
-        <h2 style={{ fontSize: compact ? "var(--sn-step-2)" : "var(--sn-step-3)" }}>{title}</h2>
-        {subtitle && <p className="muted" style={{ fontSize: "var(--sn-step-1)", marginTop: "1cqi", maxWidth: "70cqi" }}>{subtitle}</p>}
+        <h2 style={{ fontSize: compact ? "var(--sn-step-2)" : "var(--sn-step-3)", lineHeight: compact ? "var(--sn-lh-2)" : "var(--sn-lh-3)" }}>{title}</h2>
+        {subtitle && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{subtitle}</p>}
       </div>
       <div data-live style={{ flex: 1, minHeight: 0 }}>{children}</div>
     </div>
   );
 }
 
-/** Even columns. */
-export function Columns({ n = 2, gap = "var(--sn-gap)", children, style }: { n?: number; gap?: string; children: ReactNode; style?: CSSProperties }) {
-  return <div style={{ display: "grid", gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))`, gap, ...style }}>{children}</div>;
+/** Even columns on the grid: n columns of 12/n. */
+export function Columns({ n = 2, children, style, fill = false }: { n?: number; gap?: string; children: ReactNode; style?: CSSProperties; fill?: boolean }) {
+  const span = Math.max(1, Math.floor(12 / n));
+  return (
+    <Grid fill={fill} style={style}>
+      {Children.map(children, (child, i) => (
+        <Col key={i} span={span}>{child}</Col>
+      ))}
+    </Grid>
+  );
 }
 
-/** A card with a rule. */
+/** A card with a rule. Padding in baseline units. */
 export function Card({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-  return <div style={{ border: "1px solid var(--sn-rule)", borderRadius: "var(--sn-radius)", padding: "2.2cqi", fontSize: "var(--sn-step-0)", ...style }}>{children}</div>;
+  return <div style={{ border: "1px solid var(--sn-rule)", borderRadius: "var(--sn-radius)", padding: "calc(var(--sn-base) * 2)", fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)", ...style }}>{children}</div>;
 }
 
-/** Full-bleed image or figure. */
+/** Full-width image or figure. */
 export function Media({ src, alt, fit = "contain", caption }: { src: string; alt: string; fit?: "contain" | "cover"; caption?: ReactNode }) {
   return (
-    <figure style={{ margin: 0, height: "100%", display: "flex", flexDirection: "column", gap: "1.2cqi", alignItems: "center" }}>
+    <figure style={{ margin: 0, height: "100%", display: "flex", flexDirection: "column", gap: "var(--sn-base)", alignItems: "center", minHeight: 0 }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} style={{ maxWidth: "100%", maxHeight: caption ? "74cqh" : "84cqh", objectFit: fit, borderRadius: "var(--sn-radius)" }} />
-      {caption && <figcaption className="muted" style={{ fontSize: "var(--sn-step-0)" }}>{caption}</figcaption>}
+      <img src={src} alt={alt} style={{ maxWidth: "100%", maxHeight: caption ? "calc(100% - var(--sn-lh-0) - var(--sn-base))" : "100%", minHeight: 0, objectFit: fit, borderRadius: "var(--sn-radius)" }} />
+      {caption && <figcaption className="muted" style={{ fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)" }}>{caption}</figcaption>}
     </figure>
   );
 }

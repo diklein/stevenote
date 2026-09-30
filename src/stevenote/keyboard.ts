@@ -19,7 +19,8 @@ export type DeckCommand =
   | "backup"
   | "review"
   | "approve"
-  | "flags";
+  | "flags"
+  | "grid";
 
 export function commandForKey(e: KeyboardEvent): DeckCommand | null {
   const { key, shiftKey, metaKey, ctrlKey, altKey } = e;
@@ -63,7 +64,6 @@ export function commandForKey(e: KeyboardEvent): DeckCommand | null {
     case "_":
       return "hurry";
     case "g":
-    case "G":
       return "jumpStart";
     case "x":
     case "X":
@@ -74,6 +74,8 @@ export function commandForKey(e: KeyboardEvent): DeckCommand | null {
       return "approve";
     case "A":
       return "flags";
+    case "G":
+      return "grid";
     default:
       return null;
   }

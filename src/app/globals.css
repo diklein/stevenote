@@ -28,9 +28,25 @@
   --sn-step-5: calc(7.4cqi * var(--sn-type-scale));
   --sn-step-6: calc(12cqi * var(--sn-type-scale));
 
-  --sn-pad: 6cqi;
-  --sn-gap: 2cqi;
+  /* the grid: 12 columns between fixed margins, a gutter, and a baseline every 1.25cqi */
+  --sn-cols: 12;
+  --sn-margin: 5cqi;
+  --sn-gutter: 1.5cqi;
+  --sn-base: 1.25cqi;
+  --sn-col: calc((100cqi - 2 * var(--sn-margin) - (var(--sn-cols) - 1) * var(--sn-gutter)) / var(--sn-cols));
+  --sn-pad: var(--sn-margin);
+  --sn-gap: var(--sn-gutter);
   --sn-radius: 0.9cqi;
+
+  /* line heights: whole multiples of the baseline, one per type step */
+  --sn-lh--1: calc(var(--sn-base) * 2);
+  --sn-lh-0: calc(var(--sn-base) * 2);
+  --sn-lh-1: calc(var(--sn-base) * 3);
+  --sn-lh-2: calc(var(--sn-base) * 3);
+  --sn-lh-3: calc(var(--sn-base) * 4);
+  --sn-lh-4: calc(var(--sn-base) * 5);
+  --sn-lh-5: calc(var(--sn-base) * 6);
+  --sn-lh-6: calc(var(--sn-base) * 10);
 
   --sn-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --sn-duration: 350ms;
@@ -149,7 +165,7 @@ body {
   color: var(--sn-fg);
   font-family: var(--sn-font-text);
   font-size: var(--sn-step-0);
-  line-height: 1.4;
+  line-height: var(--sn-lh-0);
   transition: background-color var(--sn-duration) var(--sn-ease-out), color var(--sn-duration) var(--sn-ease-out);
   view-transition-name: sn-stage;
 }
@@ -189,11 +205,26 @@ body {
 .sn-viewport[data-embedded]:not([data-animate]) .sn-stage, .sn-viewport[data-embedded]:not([data-animate]) .sn-slide, .sn-viewport[data-preview] .sn-stage, .sn-viewport[data-preview] .sn-slide { view-transition-name: none; }
 
 /* typography inside the stage */
-.sn-stage h1, .sn-stage h2, .sn-stage h3 { font-family: var(--sn-font-display); text-wrap: balance; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
+.sn-stage h1, .sn-stage h2, .sn-stage h3 { font-family: var(--sn-font-display); text-wrap: balance; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
 .sn-stage p, .sn-stage li, .sn-stage dd, .sn-stage dt, .sn-stage blockquote, .sn-stage figcaption { text-wrap: pretty; margin: 0; }
 .sn-stage code, .sn-stage kbd, .sn-stage pre { font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; }
 .sn-stage .tabular { font-variant-numeric: tabular-nums; }
 .sn-stage .muted { color: var(--sn-muted); }
+
+/* ---- the grid ---- */
+.sn-grid { display: grid; grid-template-columns: repeat(var(--sn-cols), minmax(0, 1fr)); column-gap: var(--sn-gutter); row-gap: calc(var(--sn-base) * 2); width: 100%; align-content: start; }
+.sn-grid[data-fill] { height: 100%; align-content: stretch; }
+.sn-gridlines { position: absolute; inset: 0; z-index: 45; pointer-events: none; }
+.sn-gridlines::before {
+  content: ""; position: absolute; left: var(--sn-margin); right: var(--sn-margin); top: 0; bottom: 0;
+  background: repeating-linear-gradient(to right, oklch(65% 0.25 350 / 0.1) 0 var(--sn-col), transparent var(--sn-col) calc(var(--sn-col) + var(--sn-gutter)));
+}
+.sn-gridlines::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to bottom, oklch(70% 0.15 220 / 0.22) 0 1px, transparent 1px var(--sn-base));
+  background-position: 0 var(--sn-margin);
+}
+.sn-gridlines > i { position: absolute; left: var(--sn-margin); right: var(--sn-margin); top: var(--sn-margin); bottom: var(--sn-margin); border: 1px solid oklch(65% 0.25 350 / 0.6); }
 
 /* ---- builds ---- */
 [data-step] {

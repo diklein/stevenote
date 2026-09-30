@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { Stage, Step, Statement, runTransition, TRANSITIONS, type DeckDef, type TransitionName } from "@/stevenote";
+import { Col, Grid, Stage, Step, Statement, runTransition, TRANSITIONS, type DeckDef, type TransitionName } from "@/stevenote";
 
 /**
  * The design system page: the tokens, the type scale, the transitions and the step effects, each
@@ -53,6 +53,32 @@ function transitionDeck(theme: "light" | "dark"): DeckDef {
   };
 }
 
+const gridDeck: DeckDef = {
+  id: "system-grid",
+  title: "Grid",
+  slides: [
+    {
+      id: "grid",
+      content: (
+        <Grid fill>
+          <Col span={7} align="center">
+            <h2 style={{ fontSize: "var(--sn-step-4)", lineHeight: "var(--sn-lh-4)" }}>Twelve columns, one baseline.</h2>
+            <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginTop: "calc(var(--sn-base) * 2)" }}>Margins 5cqi, gutters 1.5cqi, baseline 1.25cqi. Every line height is a whole number of baselines.</p>
+          </Col>
+          <Col span={5} align="center">
+            <div style={{ border: "1px solid var(--sn-rule)", borderRadius: "var(--sn-radius)", padding: "calc(var(--sn-base) * 2)", fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)" }}>A card in the right five columns, padded in baselines.</div>
+          </Col>
+          {[6, 4, 2].map((n) => (
+            <Col key={n} span={n}>
+              <div className="muted" style={{ borderTop: "1px solid var(--sn-rule)", paddingTop: "var(--sn-base)", fontSize: "var(--sn-step--1)", lineHeight: "var(--sn-lh--1)" }}>span {n}</div>
+            </Col>
+          ))}
+        </Grid>
+      ),
+    },
+  ],
+};
+
 const stepDeck: DeckDef = {
   id: "system-steps",
   title: "Steps",
@@ -100,6 +126,10 @@ export default function SystemPage() {
       <h2 style={h2}>Type scale</h2>
       <p style={p}>Eight steps from 1.5 to 12 percent of the stage width. Headlines use steps 4 and up, semibold, tight tracking, balanced wrapping. Body text is step 0 with pretty wrapping. Geist Sans and Geist Mono.</p>
       <Stage deck={typeDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded />
+
+      <h2 style={h2}>Grid</h2>
+      <p style={p}>A strict grid: twelve columns between 5cqi margins with 1.5cqi gutters, and a 1.25cqi baseline. Layouts place content with Grid and Col; type sizes carry line heights that are whole baselines, so text on adjacent columns sits on the same lines. Shift+G in a deck shows the overlay.</p>
+      <Stage deck={gridDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded prefs={{ transition: "deck", theme: "deck", motion: "auto", dimVideo: true, counter: "hover", hideCursor: true, letterbox: "black", typeScale: 1, hurry: false, reviewFlags: false, gridOverlay: true }} />
 
       <h2 style={h2}>Colour</h2>
       <p style={p}>Five tokens in OKLCH per theme. A slide can override any of them inline, and every component reads tokens rather than literal colours, so a background swap reskins builds, cards and code.</p>

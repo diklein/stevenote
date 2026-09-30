@@ -10,6 +10,7 @@
   --sn-muted: oklch(52% 0 0);
   --sn-accent: oklch(55% 0.2 260);
   --sn-rule: oklch(88% 0 0);
+  --sn-dim-l: 52%;
   --sn-font-display: var(--font-geist-sans), system-ui, sans-serif;
   --sn-font-text: var(--font-geist-sans), system-ui, sans-serif;
   --sn-font-mono: var(--font-geist-mono), ui-monospace, monospace;
@@ -77,6 +78,7 @@ body {
   view-transition-name: sn-stage;
 }
 .sn-stage[data-theme="dark"] {
+  --sn-dim-l: 78%;
   --sn-bg: oklch(10% 0 0);
   --sn-fg: oklch(97% 0 0);
   --sn-muted: oklch(68% 0 0);
@@ -256,3 +258,8 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-notes .preview { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 0.6rem; background: black; }
 .sn-notes .preview > .sn-viewport { position: absolute; inset: 0; }
 .sn-notes .preview .sn-stage { width: 100%; }
+
+/* mermaid diagrams scale to their card */
+.sn-mermaid-card { position: relative; }
+.sn-mermaid { position: absolute; inset: 1.6cqi; display: grid; place-items: center; }
+.sn-mermaid svg { width: 100% !important; height: 100% !important; max-width: 100% !important; }

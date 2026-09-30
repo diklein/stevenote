@@ -8,7 +8,7 @@ if (existsSync(dir) && lstatSync(dir).isSymbolicLink()) process.exit(0);
 if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 const stubs = {
   "decks.ts": `import type { DeckDef } from "@/stevenote";\n\n/** Stub. Run \`npm run link-private -- ../stevenote-decks\` to mount a private decks repo here. */\nexport const privateDecks: Record<string, DeckDef> = {};\n`,
-  "api.ts": `export type PrivateHandler = (req: Request) => Promise<Response> | Response;\nexport type PrivateRoute = Partial<Record<"GET" | "POST" | "PUT" | "DELETE", PrivateHandler>>;\n\n/** Stub. A private repo exports its routes here; they are served under /api/private/<path>. */\nexport const privateRoutes: Record<string, PrivateRoute> = {};\n`,
+  "api.ts": `export type PrivateHandler = (req: Request, rest: string) => Promise<Response> | Response;\nexport type PrivateRoute = Partial<Record<"GET" | "POST" | "PUT" | "DELETE", PrivateHandler>>;\n\n/** Stub. A private repo exports its routes here; they are served under /api/private/<path>. */\nexport const privateRoutes: Record<string, PrivateRoute> = {};\n`,
 };
 for (const [name, body] of Object.entries(stubs)) {
   const file = join(dir, name);

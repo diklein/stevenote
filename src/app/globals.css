@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../private/**/*.{ts,tsx}";
+@source "../../node_modules/streamdown/dist/*.js";
 
 /*
   Stevenote tokens. A deck sets these on its stage; a slide may override them.
@@ -37,12 +39,85 @@
   --sn-step-duration: 240ms;
 }
 
+/*
+  Component-library tokens (shadcn names) derived from the stage tokens, so components written for
+  a shadcn app render on any slide and follow its theme. Plus the dq-agents accent colours.
+*/
+:root {
+  --background: var(--sn-bg);
+  --foreground: var(--sn-fg);
+  --card: color-mix(in oklch, var(--sn-fg) 4%, var(--sn-bg));
+  --card-foreground: var(--sn-fg);
+  --popover: var(--sn-bg);
+  --popover-foreground: var(--sn-fg);
+  --primary: var(--sn-fg);
+  --primary-foreground: var(--sn-bg);
+  --secondary: color-mix(in oklch, var(--sn-fg) 8%, var(--sn-bg));
+  --secondary-foreground: var(--sn-fg);
+  --muted: color-mix(in oklch, var(--sn-fg) 7%, var(--sn-bg));
+  --muted-foreground: var(--sn-muted);
+  --accent: color-mix(in oklch, var(--sn-fg) 8%, var(--sn-bg));
+  --accent-foreground: var(--sn-fg);
+  --destructive: var(--danger);
+  --border: var(--sn-rule);
+  --input: var(--sn-rule);
+  --ring: var(--sn-muted);
+  --radius: 0.5rem;
+  --blue: #0070f3;
+  --success: #0f7b3e;
+  --success-bg: #ecfdf3;
+  --danger: #ee0000;
+  --danger-bg: #fff2f2;
+  --warning: #a35200;
+  --warning-bg: #fff7e6;
+}
+.sn-stage[data-theme="dark"] {
+  --blue: #3b9eff;
+  --success: #4ade80;
+  --success-bg: #0f2e1c;
+  --danger: #ff6b6b;
+  --danger-bg: #3b1212;
+  --warning: #f5a524;
+  --warning-bg: #3a2a10;
+}
+
 @theme inline {
-  --color-background: var(--sn-bg);
-  --color-foreground: var(--sn-fg);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-blue: var(--blue);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+
+/* live boards written for the dq-agents app: rem-based type inside the stage */
+.dq { font-size: 15px; line-height: 1.5; height: 100%; }
+.dq * { border-color: var(--border); }
 
 html, body { height: 100%; }
 body {

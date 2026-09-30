@@ -18,6 +18,7 @@ export type Prefs = {
   letterbox: "black" | "stage";
   typeScale: 0.9 | 1 | 1.1 | 1.2;
   hurry: boolean;
+  reviewFlags: boolean;
 };
 
 export const defaultPrefs: Prefs = {
@@ -30,6 +31,7 @@ export const defaultPrefs: Prefs = {
   letterbox: "black",
   typeScale: 1,
   hurry: false,
+  reviewFlags: true,
 };
 
 const KEY = "stevenote:prefs";
@@ -62,6 +64,7 @@ export const PREF_ROWS: Row[] = [
   { key: "letterbox", label: "Letterbox", values: ["black", "stage"], show: (v) => (v === "stage" ? "stage colour" : "black") } as Row<"letterbox">,
   { key: "typeScale", label: "Type size", values: [0.9, 1, 1.1, 1.2], show: (v) => `${Math.round(Number(v) * 100)}%` } as Row<"typeScale">,
   { key: "hurry", label: "Hurry mode", values: [false, true], show: (v) => (v ? "on: skipping marked slides" : "off") } as Row<"hurry">,
+  { key: "reviewFlags", label: "Review flags", values: [true, false], show: (v) => (v ? "shown" : "hidden") } as Row<"reviewFlags">,
 ] as Row[];
 
 export function cyclePref(p: Prefs, key: keyof Prefs, dir: 1 | -1): Prefs {

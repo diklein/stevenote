@@ -88,6 +88,10 @@ public/...          media, served at /private/<path>
 
 Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `src/private`). Secrets go in `.env.local`. Without a private repo the app builds with stubs.
 
+## Review
+
+Press `/` on any slide for a feedback panel; type, then Esc or ⌘Enter. `A` toggles the slide's approval; `⇧A` shows or hides the flags in the corner (a green check for approved, an amber dot for feedback). The notes window shows both. The deck stores nothing: it reads and writes `/api/private/review?deck=<id>`, which a private decks repo implements against its own files (see the decks repo's `src/api.ts`); without that route the browser's localStorage holds the review.
+
 ## Design system
 
 `/system` renders the type scale, colour tokens, every transition and every step effect with the deck engine itself.
@@ -106,6 +110,7 @@ Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `sr
 | minus | hurry mode (skips `skippable` slides) |
 | X | swap a live component for its backup video |
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
+| slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
 | ? | help |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.

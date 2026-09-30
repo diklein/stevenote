@@ -5,6 +5,7 @@ import { Stage } from "./stage";
 import { parseHash } from "./state";
 import { openChannel, readSnapshot, type NavAction, type SyncMessage } from "./sync";
 import { initialState, type DeckDef, type DeckState } from "./types";
+import { useReview } from "./review";
 
 /**
  * The notes window. Follows the deck over its channel, drives it with the keyboard, and shows what
@@ -27,6 +28,7 @@ export function Notes({ deck }: { deck: DeckDef }) {
   const [connected, setConnected] = useState(false);
   const [alerts, setAlerts] = useState<Record<number, string>>({});
   const [backups, setBackups] = useState<Record<number, boolean>>({});
+  const { review } = useReview(deck.id);
   const channel = useRef<BroadcastChannel | null>(null);
   const seq = useRef(snap?.seq ?? 0);
 
@@ -156,6 +158,13 @@ export function Notes({ deck }: { deck: DeckDef }) {
             <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)" }}>On screen</p>
             <p style={{ fontSize: "1.1em", color: "oklch(85% 0 0)", marginTop: "0.2em" }}>{slide?.title ?? slide?.id}</p>
             {slide?.notes?.time && <p style={{ fontSize: "0.9em", color: "oklch(60% 0 0)", marginTop: "0.4em" }}>about {slide.notes.time}s</p>}
+            {slide && review[slide.id]?.approved && <p style={{ fontSize: "0.9em", color: "oklch(75% 0.15 150)", marginTop: "0.4em" }}>✓ approved</p>}
+            {slide && review[slide.id]?.feedback?.trim() && (
+              <>
+                <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)", marginTop: "1em" }}>Feedback</p>
+                <p style={{ fontSize: "0.95em", color: "oklch(85% 0.12 80)", marginTop: "0.2em", whiteSpace: "pre-wrap" }}>{review[slide.id].feedback}</p>
+              </>
+            )}
             {nextSlide && (
               <>
                 <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)", marginTop: "1em" }}>Then</p>

@@ -56,13 +56,13 @@ MDX Deck and Tome are dead. Spectacle is maintained but dated.
 
 ### Stack
 
-Next.js 16 App Router, React 19.3, TypeScript, Tailwind v4, Motion. This matches Platinum and dq-agents, deploys to Vercel in one step, and gives `next/font`, MDX and Server Components for free. React 19.3 ships `<ViewTransition>` and `addTransitionType`, which is the right primitive for direction-aware slide transitions.
+Next.js 16 App Router, React 19.3, TypeScript, Tailwind v4, Motion. This matches Platinum and the earlier deck, deploys to Vercel in one step, and gives `next/font`, MDX and Server Components for free. React 19.3 ships `<ViewTransition>` and `addTransitionType`, which is the right primitive for direction-aware slide transitions.
 
 One dependency rule: nothing added that the platform already does. View Transitions, BroadcastChannel, container queries, `text-wrap`, `<video>`, the Fullscreen API and the Window Management API cover most of the feature list.
 
 ### Authoring model
 
-A deck is a folder: `decks/<slug>/deck.mdx` plus `notes`, media and any bespoke components. Slides are separated by `---` in MDX with per-slide frontmatter (layout, theme, transition, timing, notes). Any slide can drop to TSX. Layout components form a small vocabulary that dq-agents already proved: `Statement`, `Stat`, `Evidence`, `LiveFrame`, plus new `Media`, `Compare`, `Steps`, `Code`. Notes live next to the slide, not in a parallel array keyed by index (that drift is the top bug in the dq-agents deck).
+A deck is a folder: `decks/<slug>/deck.mdx` plus `notes`, media and any bespoke components. Slides are separated by `---` in MDX with per-slide frontmatter (layout, theme, transition, timing, notes). Any slide can drop to TSX. Layout components form a small vocabulary that the earlier deck already proved: `Statement`, `Stat`, `Evidence`, `LiveFrame`, plus new `Media`, `Compare`, `Steps`, `Code`. Notes live next to the slide, not in a parallel array keyed by index (that drift is the top bug in the the earlier deck deck).
 
 ### Canvas and typography
 
@@ -98,7 +98,7 @@ Separate window opened from a click with `window.open(url, "stevenote-notes", "p
 
 Transport: BroadcastChannel keyed by deck slug, carrying `{ deckId, slide, step, blanked, seq, ts }`. Receivers ignore stale `seq`. The same object is mirrored to localStorage so a window that opens or reloads late hydrates instantly, and a `hello`/`state` handshake plus a two-second heartbeat lets either side detect the other's reload and resend. Either window can originate navigation, since focus lives in the notes window half the time. Both windows write the same hash.
 
-Layout, taken from Keynote's presenter display: current slide rendered live at small scale (same components, `inert`), next build state, notes with the chunk for the current step highlighted, "step 2 of 5", elapsed and wall clock, per-slide time budget with on-pace, behind and ahead colour, a ready-to-advance indicator while a transition or video is running, and the text-size control from dq-agents. Video slides show time remaining.
+Layout, taken from Keynote's presenter display: current slide rendered live at small scale (same components, `inert`), next build state, notes with the chunk for the current step highlighted, "step 2 of 5", elapsed and wall clock, per-slide time budget with on-pace, behind and ahead colour, a ready-to-advance indicator while a transition or video is running, and the text-size control from the earlier deck. Video slides show time remaining.
 
 Progressive enhancement with the Window Management API on Chrome: one click can place the notes window on the built-in display and put the slides fullscreen on the external one. Document Picture-in-Picture as an optional floating notes card on a single-screen laptop (whether Zoom hides it is unverified).
 
@@ -123,7 +123,7 @@ Case studies are mostly screen recordings, so video is a first-class slide type,
 
 ### Keyboard and remote
 
-Bind the union of reveal.js, Slidev and clicker keys via `event.key`: PageDown, Right, Space, Enter, N for next; PageUp, Left, Backspace, P for previous; Shift as the universal back modifier; B or period for blank (broadcast so notes shows BLANKED); Esc leaves blank or overview but never the presentation; F fullscreen; G then digits then Enter to jump; S opens notes; O overview grid; question mark for help; minus enters running-out-of-time mode which hides slides marked `skippable`. Logitech clickers send PageUp and PageDown; the Spotlight may send arrows (unverified). Keys are ignored when focus is in an editor unless a modifier is held, and Space or Enter on a focused button inside a live slide must click the button (a real bug in the dq-agents deck). Laser dot and spotlight overlays broadcast in slide-relative units so they show in the notes window too. Swipe on touch.
+Bind the union of reveal.js, Slidev and clicker keys via `event.key`: PageDown, Right, Space, Enter, N for next; PageUp, Left, Backspace, P for previous; Shift as the universal back modifier; B or period for blank (broadcast so notes shows BLANKED); Esc leaves blank or overview but never the presentation; F fullscreen; G then digits then Enter to jump; S opens notes; O overview grid; question mark for help; minus enters running-out-of-time mode which hides slides marked `skippable`. Logitech clickers send PageUp and PageDown; the Spotlight may send arrows (unverified). Keys are ignored when focus is in an editor unless a modifier is held, and Space or Enter on a focused button inside a live slide must click the button (a real bug in the the earlier deck deck). Laser dot and spotlight overlays broadcast in slide-relative units so they show in the notes window too. Swipe on touch.
 
 ### Export
 
@@ -133,7 +133,7 @@ A print route renders every `(slide, step)` pair as a fixed 1920×1080 block wit
 
 Everything local: fonts, images, videos, the Sandpack bundler. A rehearsal mode records actual per-slide times against budgets and stores them, as Keynote's Rehearse does. Wichary's test list (dark, light grey and photo slides on the real display, remote from the real distance, Wi-Fi off) becomes a checklist in the README.
 
-## 5. What we keep from dq-agents and what we fix
+## 5. What we keep from the earlier deck engine and what we fix
 
 Keep: the `Deck` engine shape, `Statement` and `LiveFrame`, the BroadcastChannel presenter window with time budget and amber "do" cues, the popup-blocked fallback, `inert` on inactive slides, hash sync, the eased count-up with reduced-motion, `text-wrap` rules scoped to the deck, the light and dark rhythm carrying the story.
 
@@ -147,7 +147,7 @@ Fix: everything mounts at load so the score count-up plays before anyone sees it
 4. **Media.** Video slide type with chapters, encoding script, image slides with lightbox-style zoom.
 5. **Live.** Shiki, CodeMirror, react-live, Sandpack, iframe.
 6. **Export and polish.** Print route, overview grid, laser and spotlight, skippable and bonus slides, help overlay, offline check.
-7. **The Meta accounting deck** as the first real deck, then the slide about the tool.
+7. **The first real deck**, then the slide about the tool.
 
 ## 7. Open questions for Dave
 

@@ -7,6 +7,7 @@ import { clamp, formatHash, parseHash } from "./state";
 import { openChannel, readSnapshot, writeSnapshot, type NavAction, type SyncMessage } from "./sync";
 import { runTransition, type Direction } from "./transitions";
 import { cyclePref, PrefsPanel, PREF_ROWS, usePrefs, type Prefs } from "./prefs";
+import { ReviewFlag, ReviewPanel, useReview } from "./review";
 import { initialState, type DeckDef, type DeckState, type TransitionName } from "./types";
 
 /**
@@ -21,6 +22,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [help, setHelp] = useState(false);
   const [prefs, setPrefs] = usePrefs();
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const { review, save: saveReview } = useReview(deck.id);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [prefsRow, setPrefsRow] = useState(0);
   const hurry = prefs.hurry;
   const setHurry = useCallback((v: boolean | ((h: boolean) => boolean)) => setPrefs((p) => ({ ...p, hurry: typeof v === "function" ? v(p.hurry) : v })), [setPrefs]);
@@ -219,6 +222,11 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         e.preventDefault();
         return;
       }
+      if (reviewOpen && e.key === "Escape") {
+        setReviewOpen(false);
+        e.preventDefault();
+        return;
+      }
       if (e.key === "," && !e.metaKey && !e.ctrlKey) {
         setPrefsOpen(true);
         setHelp(false);
@@ -275,6 +283,14 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return setJump("");
         case "backup":
           return window.dispatchEvent(new CustomEvent("stevenote:toggle-backup"));
+        case "review":
+          return setReviewOpen((v) => !v);
+        case "approve": {
+          const id = deck.slides[stateRef.current.slide].id;
+          return saveReview(id, { approved: !review[id]?.approved });
+        }
+        case "flags":
+          return setPrefs((p) => ({ ...p, reviewFlags: !p.reviewFlags }));
         case "escape":
           if (help) return setHelp(false);
           if (stateRef.current.blank) return apply({ ...stateRef.current, blank: null });
@@ -293,7 +309,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("message", onMessage);
     };
-  }, [apply, deck.slides.length, goto, help, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry]);
+  }, [apply, deck.slides, goto, help, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry, reviewOpen, review, saveReview]);
 
   /* ---- cursor: hide after two seconds still ---- */
   useEffect(() => {
@@ -327,6 +343,19 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   return (
     <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
+      {prefs.reviewFlags && <ReviewFlag approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} />}
+      {reviewOpen && (
+        <ReviewPanel
+          slideId={deck.slides[state.slide].id}
+          title={deck.slides[state.slide].title ?? deck.slides[state.slide].id}
+          index={state.slide}
+          value={review[deck.slides[state.slide].id]?.feedback ?? ""}
+          approved={!!review[deck.slides[state.slide].id]?.approved}
+          onChange={(text) => saveReview(deck.slides[state.slide].id, { feedback: text })}
+          onToggleApproved={() => saveReview(deck.slides[state.slide].id, { approved: !review[deck.slides[state.slide].id]?.approved })}
+          onClose={() => setReviewOpen(false)}
+        />
+      )}
       {prefsOpen && (
         <PrefsPanel
           prefs={prefs}
@@ -358,6 +387,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           <div><kbd>G</kbd> then a number then Enter to jump</div>
           <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
           <div><kbd>X</kbd> swap a live component for its backup video</div>
+          <div><kbd>/</kbd> feedback on this slide <kbd>A</kbd> approve <kbd>⇧A</kbd> show or hide flags</div>
           <div><kbd>,</kbd> preferences</div>
           <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
         </div>

@@ -339,3 +339,15 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-mermaid-card { position: relative; }
 .sn-mermaid { position: absolute; inset: 1.6cqi; display: grid; place-items: center; }
 .sn-mermaid svg { width: 100% !important; height: 100% !important; max-width: 100% !important; }
+
+/* ---- review: feedback panel and approval flag ---- */
+.sn-review { position: absolute; right: 2cqi; bottom: 2cqi; z-index: 60; width: 40cqi; background: oklch(12% 0 0 / 0.94); color: white; border-radius: var(--sn-radius); padding: 1.4cqi 1.6cqi; font-size: 1.3cqi; backdrop-filter: blur(14px); box-shadow: 0 2cqi 6cqi oklch(0% 0 0 / 0.4); display: grid; gap: 1cqi; }
+.sn-review-head { display: flex; justify-content: space-between; align-items: center; gap: 1cqi; }
+.sn-review-head .muted { color: oklch(65% 0 0); font-weight: 400; }
+.sn-review textarea { width: 100%; background: oklch(100% 0 0 / 0.06); color: white; border: 1px solid oklch(100% 0 0 / 0.15); border-radius: 0.6cqi; padding: 1cqi; font: inherit; line-height: 1.4; resize: vertical; }
+.sn-review textarea:focus { outline: none; border-color: oklch(100% 0 0 / 0.4); }
+.sn-review-foot { font-size: 0.85em; color: oklch(55% 0 0); }
+.sn-review-approve { border: 1px solid oklch(100% 0 0 / 0.25); background: transparent; color: white; border-radius: 999px; padding: 0.4cqi 1.2cqi; font: inherit; font-size: 0.9em; cursor: pointer; }
+.sn-review-approve[data-on] { background: oklch(60% 0.17 150); border-color: transparent; color: white; }
+.sn-flag { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; width: 2.6cqi; height: 2.6cqi; border-radius: 50%; display: grid; place-items: center; font-size: 1.4cqi; font-weight: 600; color: white; background: oklch(70% 0.15 80); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); }
+.sn-flag[data-approved] { background: oklch(60% 0.17 150); }

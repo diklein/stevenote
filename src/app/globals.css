@@ -14,15 +14,16 @@
   --sn-font-text: var(--font-geist-sans), system-ui, sans-serif;
   --sn-font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* type scale in container-inline units: 1cqi = 1% of stage width */
-  --sn-step--1: 1.5cqi;
-  --sn-step-0: 1.9cqi;
-  --sn-step-1: 2.4cqi;
-  --sn-step-2: 3.1cqi;
-  --sn-step-3: 4.2cqi;
-  --sn-step-4: 5.6cqi;
-  --sn-step-5: 7.4cqi;
-  --sn-step-6: 12cqi;
+  /* type scale in container-inline units: 1cqi = 1% of stage width. --sn-type-scale is a presenter preference. */
+  --sn-type-scale: 1;
+  --sn-step--1: calc(1.5cqi * var(--sn-type-scale));
+  --sn-step-0: calc(1.9cqi * var(--sn-type-scale));
+  --sn-step-1: calc(2.4cqi * var(--sn-type-scale));
+  --sn-step-2: calc(3.1cqi * var(--sn-type-scale));
+  --sn-step-3: calc(4.2cqi * var(--sn-type-scale));
+  --sn-step-4: calc(5.6cqi * var(--sn-type-scale));
+  --sn-step-5: calc(7.4cqi * var(--sn-type-scale));
+  --sn-step-6: calc(12cqi * var(--sn-type-scale));
 
   --sn-pad: 6cqi;
   --sn-gap: 2cqi;
@@ -200,12 +201,31 @@ html[data-sn-transition="morph"] ::view-transition-new(sn-slide) { animation-nam
   ::view-transition-group(*) { animation-duration: 120ms !important; }
   [data-step] { transition: opacity 120ms linear; transform: none !important; filter: none !important; }
 }
+/* the same, chosen in preferences */
+html[data-sn-motion="reduced"] ::view-transition-old(sn-slide) { animation: sn-fade-out 120ms linear !important; }
+html[data-sn-motion="reduced"] ::view-transition-new(sn-slide) { animation: sn-fade-in 120ms linear !important; }
+html[data-sn-motion="reduced"] ::view-transition-group(*) { animation-duration: 120ms !important; }
+html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; transform: none !important; filter: none !important; }
+
+/* ---- preferences panel ---- */
+.sn-prefs { position: absolute; inset: auto auto 2cqi 2cqi; z-index: 60; width: 44cqi; background: oklch(12% 0 0 / 0.94); color: white; border-radius: var(--sn-radius); padding: 1.6cqi 0; font-size: 1.5cqi; backdrop-filter: blur(14px); box-shadow: 0 2cqi 6cqi oklch(0% 0 0 / 0.4); }
+.sn-prefs-title { padding: 0 2cqi 1cqi; font-weight: 500; display: flex; justify-content: space-between; gap: 1cqi; }
+.sn-prefs-title .muted { color: oklch(60% 0 0); font-weight: 400; font-size: 0.85em; }
+.sn-prefs-row { display: flex; justify-content: space-between; align-items: center; gap: 2cqi; padding: 0.7cqi 2cqi; cursor: pointer; }
+.sn-prefs-row[data-selected] { background: oklch(100% 0 0 / 0.12); }
+.sn-prefs-value { display: inline-flex; align-items: center; gap: 0.8cqi; color: oklch(80% 0 0); font-variant-numeric: tabular-nums; }
+.sn-prefs-value button { background: none; border: 0; color: oklch(60% 0 0); font: inherit; font-size: 1.2em; line-height: 1; cursor: pointer; padding: 0 0.3cqi; }
+.sn-prefs-row[data-selected] .sn-prefs-value { color: white; }
 
 /* ---- chrome (progress, counter, help) ---- */
 .sn-progress { position: absolute; left: 0; top: 0; height: 0.25cqi; background: var(--sn-fg); opacity: 0.5; transition: width 300ms var(--sn-ease-out); z-index: 30; }
 .sn-counter { position: absolute; right: 2cqi; bottom: 1.4cqi; font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; font-size: 1.1cqi; color: var(--sn-muted); z-index: 30; opacity: 0; transition: opacity 200ms; }
 .sn-stage:hover .sn-counter { opacity: 1; }
 .sn-cursor-hidden .sn-counter { opacity: 0; }
+.sn-stage[data-counter="always"] .sn-counter, .sn-cursor-hidden .sn-stage[data-counter="always"] .sn-counter { opacity: 1; }
+.sn-stage[data-counter="never"] .sn-counter, .sn-stage[data-counter="never"]:hover .sn-counter { opacity: 0; }
+.sn-viewport[data-letterbox="stage"] { background: var(--sn-bg); }
+.sn-stage[data-dim="false"] .sn-slide[data-focus="true"] .sn-slide-inner :is(h1, h2, h3, p, li, figcaption, [data-dim]) { opacity: 1; }
 .sn-blank { position: absolute; inset: 0; z-index: 40; background: black; }
 .sn-blank[data-color="white"] { background: white; }
 .sn-help { position: absolute; inset: auto 2cqi 2cqi auto; z-index: 50; background: oklch(12% 0 0 / 0.92); color: white; padding: 2cqi 2.4cqi; border-radius: var(--sn-radius); font-size: 1.4cqi; line-height: 1.6; backdrop-filter: blur(12px); }

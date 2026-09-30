@@ -6,6 +6,7 @@ import { Stage } from "./stage";
 import { clamp, formatHash, parseHash } from "./state";
 import { openChannel, readSnapshot, writeSnapshot, type NavAction, type SyncMessage } from "./sync";
 import { runTransition, type Direction } from "./transitions";
+import { cyclePref, PrefsPanel, PREF_ROWS, usePrefs, type Prefs } from "./prefs";
 import { initialState, type DeckDef, type DeckState, type TransitionName } from "./types";
 
 /**
@@ -18,7 +19,12 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [state, setState] = useState<DeckState>(() => ({ ...initialState, ...(parseHash(window.location.hash, deck.slides.length) ?? {}) }));
   const [stepCounts, setStepCounts] = useState<Record<number, number>>({});
   const [help, setHelp] = useState(false);
-  const [hurry, setHurry] = useState(false);
+  const [prefs, setPrefs] = usePrefs();
+  const [prefsOpen, setPrefsOpen] = useState(false);
+  const [prefsRow, setPrefsRow] = useState(0);
+  const hurry = prefs.hurry;
+  const setHurry = useCallback((v: boolean | ((h: boolean) => boolean)) => setPrefs((p) => ({ ...p, hurry: typeof v === "function" ? v(p.hurry) : v })), [setPrefs]);
+  const prefsRef = useRef(prefs);
   const [jump, setJump] = useState<string | null>(null);
   const [cursorHidden, setCursorHidden] = useState(false);
   const [alerts, setAlerts] = useState<Record<number, string>>({});
@@ -29,7 +35,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
     stateRef.current = state;
     countsRef.current = stepCounts;
     alertsRef.current = alerts;
-  }, [state, stepCounts, alerts]);
+    prefsRef.current = prefs;
+  }, [state, stepCounts, alerts, prefs]);
 
   // Live components raise alerts (backup video on, health check failed); the notes window shows them.
   useEffect(() => {
@@ -77,8 +84,9 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       };
 
       if (slideChanged) {
-        const name: TransitionName = deck.slides[next.slide].transition ?? deck.transition ?? "fade";
-        runTransition(name, direction, commit);
+        const authored: TransitionName = deck.slides[next.slide].transition ?? deck.transition ?? "fade";
+        const name = prefsRef.current.transition === "deck" ? authored : prefsRef.current.transition;
+        runTransition(prefsRef.current.motion === "reduced" ? "fade" : name, direction, commit);
       } else {
         commit();
       }
@@ -187,6 +195,25 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (targetOwnsKey(e)) return;
+      if (prefsOpen) {
+        const rows = PREF_ROWS.length + 1;
+        if (e.key === "ArrowDown" || e.key === "Tab") setPrefsRow((r) => (r + 1) % rows);
+        else if (e.key === "ArrowUp") setPrefsRow((r) => (r - 1 + rows) % rows);
+        else if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
+          if (prefsRow === PREF_ROWS.length) setPrefsOpen(false);
+          else setPrefs((p) => cyclePref(p, PREF_ROWS[prefsRow].key, 1));
+        } else if (e.key === "ArrowLeft") {
+          if (prefsRow < PREF_ROWS.length) setPrefs((p) => cyclePref(p, PREF_ROWS[prefsRow].key, -1));
+        } else if (e.key === "Escape" || e.key === ",") setPrefsOpen(false);
+        e.preventDefault();
+        return;
+      }
+      if (e.key === "," && !e.metaKey && !e.ctrlKey) {
+        setPrefsOpen(true);
+        setHelp(false);
+        e.preventDefault();
+        return;
+      }
       if (jump !== null) {
         if (/^\d$/.test(e.key)) {
           setJump(jump + e.key);
@@ -232,7 +259,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         case "help":
           return setHelp((v) => !v);
         case "hurry":
-          return setHurry((v) => !v);
+          return setHurry((v: boolean) => !v);
         case "jumpStart":
           return setJump("");
         case "backup":
@@ -245,7 +272,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [apply, deck.slides.length, goto, help, jump, lastIndex, next, openNotes, prev]);
+  }, [apply, deck.slides.length, goto, help, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry]);
 
   /* ---- cursor: hide after two seconds still ---- */
   useEffect(() => {
@@ -264,23 +291,41 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("sn-cursor-hidden", cursorHidden);
+    document.documentElement.classList.toggle("sn-cursor-hidden", cursorHidden && prefs.hideCursor);
     return () => document.documentElement.classList.remove("sn-cursor-hidden");
-  }, [cursorHidden]);
+  }, [cursorHidden, prefs.hideCursor]);
+
+  // Preferences that CSS reads.
+  useEffect(() => {
+    const html = document.documentElement;
+    html.dataset.snMotion = prefs.motion;
+    return () => {
+      delete html.dataset.snMotion;
+    };
+  }, [prefs.motion]);
 
   return (
-    <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome>
+    <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
+      {prefsOpen && (
+        <PrefsPanel
+          prefs={prefs}
+          selected={prefsRow}
+          onSelect={setPrefsRow}
+          onCycle={(key: keyof Prefs, dir) => setPrefs((p) => cyclePref(p, key, dir))}
+          onClose={() => setPrefsOpen(false)}
+        />
+      )}
       {jump !== null && (
         <div className="sn-help" role="status">
           Go to slide <strong>{jump || "…"}</strong>
         </div>
       )}
-      {hurry && !help && jump === null && (
+      {hurry && !help && !prefsOpen && jump === null && (
         <div className="sn-help" role="status">
           Hurry mode: skipping marked slides
         </div>
       )}
-      {help && (
+      {help && !prefsOpen && (
         <div className="sn-help" role="dialog" aria-label="Keyboard shortcuts">
           <div><kbd>→</kbd><kbd>Space</kbd> next step or slide</div>
           <div><kbd>←</kbd><kbd>⇧Space</kbd> back</div>
@@ -289,6 +334,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           <div><kbd>G</kbd> then a number then Enter to jump</div>
           <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
           <div><kbd>X</kbd> swap a live component for its backup video</div>
+          <div><kbd>,</kbd> preferences</div>
           <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
         </div>
       )}

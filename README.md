@@ -104,6 +104,7 @@ Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `sr
 | G, digits, Enter | jump to a slide |
 | minus | hurry mode (skips `skippable` slides) |
 | X | swap a live component for its backup video |
+| comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | ? | help |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.

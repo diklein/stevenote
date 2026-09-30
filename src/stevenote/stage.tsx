@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { DeckContext, SlideContext } from "./context";
 import { StepProvider } from "./steps";
 import type { DeckDef, DeckState } from "./types";
+import type { Prefs } from "./prefs";
 
 /**
  * The 16:9 stage. Pure render of a deck at a given state, so the notes window can show the same
@@ -19,6 +20,7 @@ export function Stage({
   chrome = false,
   embedded = false,
   animate = false,
+  prefs,
   children,
 }: {
   deck: DeckDef;
@@ -31,17 +33,20 @@ export function Stage({
   embedded?: boolean;
   /** Keep view-transition names on an embedded stage (only one per document may). */
   animate?: boolean;
+  /** Presenter preferences; only the presenting deck passes them. */
+  prefs?: Prefs;
   children?: React.ReactNode;
 }) {
   const current = deck.slides[state.slide];
-  const theme = current?.theme ?? deck.theme ?? "light";
-  const style = { ...(deck.style ?? {}), ...(current?.style ?? {}) } as CSSProperties;
+  const authoredTheme = current?.theme ?? deck.theme ?? "light";
+  const theme = prefs && prefs.theme !== "deck" ? prefs.theme : authoredTheme;
+  const style = { ...(deck.style ?? {}), ...(current?.style ?? {}), ...(prefs ? { "--sn-type-scale": prefs.typeScale } : {}) } as CSSProperties;
   const window = preview ? [state.slide] : [state.slide - 1, state.slide, state.slide + 1];
 
   return (
     <DeckContext.Provider value={{ deck, state, stepCounts }}>
-      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined}>
-        <div className="sn-stage" data-theme={theme} data-chrome={chrome || undefined} style={style}>
+      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined} data-letterbox={prefs?.letterbox}>
+        <div className="sn-stage" data-theme={theme} data-chrome={chrome || undefined} data-counter={prefs?.counter} data-dim={prefs ? String(prefs.dimVideo) : undefined} style={style}>
           {window.map((i) => {
             const slide = deck.slides[i];
             if (!slide) return null;

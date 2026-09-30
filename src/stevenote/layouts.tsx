@@ -138,11 +138,11 @@ export function Evidence({ headline, children, aside }: { headline: ReactNode; c
 }
 
 /** Frames a live component with a sentence that says what the audience is about to watch. */
-export function LiveFrame({ title, subtitle, children }: { title: ReactNode; subtitle?: ReactNode; children: ReactNode }) {
+export function LiveFrame({ title, subtitle, compact = false, children }: { title: ReactNode; subtitle?: ReactNode; compact?: boolean; children: ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2.4cqi", height: "100%" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: compact ? "1.2cqi" : "2.4cqi", height: "100%" }}>
       <div>
-        <h2 style={{ fontSize: "var(--sn-step-3)" }}>{title}</h2>
+        <h2 style={{ fontSize: compact ? "var(--sn-step-2)" : "var(--sn-step-3)" }}>{title}</h2>
         {subtitle && <p className="muted" style={{ fontSize: "var(--sn-step-1)", marginTop: "1cqi", maxWidth: "70cqi" }}>{subtitle}</p>}
       </div>
       <div data-live style={{ flex: 1, minHeight: 0 }}>{children}</div>

@@ -14,6 +14,9 @@ const links = [
   [join(process.cwd(), "src", "private"), join(repo, "src")],
   [join(process.cwd(), "public", "private"), join(repo, "public")],
 ];
+// Files in the private repo resolve packages from their real path, so give it this app's node_modules.
+const nm = join(repo, "node_modules");
+try { lstatSync(nm); } catch { symlinkSync(join(process.cwd(), "node_modules"), nm, "dir"); console.log(`${nm} -> node_modules`); }
 for (const [link, dest] of links) {
   if (!existsSync(dest)) {
     console.log(`skip: ${dest} does not exist`);

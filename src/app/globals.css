@@ -117,7 +117,7 @@
 }
 
 /* live boards written for the dq-agents app: rem-based type inside the stage */
-.dq { font-size: 15px; line-height: 1.5; height: 100%; }
+.dq { font-size: 17px; line-height: 1.5; height: 100%; }
 .dq * { border-color: var(--border); }
 
 html, body { height: 100%; }

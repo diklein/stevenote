@@ -10,4 +10,4 @@ Drop in content and get a presentation with:
 - Customizable typography and background colors per deck and per slide
 - Live code and interactive React components on any slide
 
-Extracted from the keynote deck built for the dq-agents demo. Research notes in `RESEARCH.md`.
+Extracted from the keynote deck built for the dq-agents demo. Research notes in `RESEARCH.md`. The `skills/` folder holds the deck-craft skill (storytelling, slide composition, notes). Deck content lives outside this repo; only the software and skills are public.

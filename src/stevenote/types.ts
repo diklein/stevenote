@@ -3,9 +3,9 @@ import type { CSSProperties, ReactNode } from "react";
 export type Theme = "light" | "dark";
 
 /** Slide transition styles. Chosen per deck, overridable per slide. */
-export type TransitionName = "cut" | "fade" | "push" | "rise" | "zoom" | "wipe" | "blur" | "morph";
+export type TransitionName = "cut" | "fade" | "push" | "rise" | "zoom" | "wipe" | "blur" | "morph" | "cube";
 
-export const TRANSITIONS: TransitionName[] = ["cut", "fade", "push", "rise", "zoom", "wipe", "blur", "morph"];
+export const TRANSITIONS: TransitionName[] = ["cut", "fade", "push", "rise", "zoom", "wipe", "blur", "morph", "cube"];
 
 export type SlideNotes = {
   /** What you say. First person, plain. */

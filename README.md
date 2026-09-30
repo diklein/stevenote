@@ -3,7 +3,7 @@
 A presentation tool built as software: slides are React components, the deck is a Next.js app, and the craft of the tool is part of the talk.
 
 - Speaker notes in a separate browser window, so a shared Zoom window shows only the slides
-- Slide transitions through the View Transitions API: cut, fade, push, rise, zoom, wipe, blur, morph
+- Slide transitions through the View Transitions API: cut, fade, push, rise, zoom, wipe, blur, morph, cube
 - Builds: any component can be a click, in document order or at an explicit position
 - Typography and colours as tokens per deck and per slide, sized in container units so text lays out natively at any window size
 - Video as a slide type, with chapters as clicks

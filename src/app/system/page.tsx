@@ -120,7 +120,7 @@ export default function SystemPage() {
       </div>
 
       <h2 style={h2}>Transitions</h2>
-      <p style={p}>Eight styles on the View Transitions API. Slide changes take 350ms on cubic-bezier(0.32, 0.72, 0, 1); exits run faster than enters; reduced motion collapses everything to a 120ms crossfade. Direction follows forward and back.</p>
+      <p style={p}>Nine styles on the View Transitions API. Cube runs at 700ms with an ease-in-out, since both faces are on screen the whole time. Slide changes take 350ms on cubic-bezier(0.32, 0.72, 0, 1); exits run faster than enters; reduced motion collapses everything to a 120ms crossfade. Direction follows forward and back.</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
         {TRANSITIONS.map((t) => (
           <button key={t} type="button" style={{ ...btn, borderColor: t === last ? "white" : undefined }} onClick={() => play(t)}>

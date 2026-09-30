@@ -77,6 +77,7 @@ export const example: DeckDef = {
     { id: "rise", title: "rise", transition: "rise", notes: { say: "Rise.", time: 5 }, content: <Statement align="center" kicker="transition">rise</Statement> },
     { id: "wipe", title: "wipe", transition: "wipe", theme: "dark", style: { "--sn-bg": "oklch(35% 0.12 260)" } as React.CSSProperties, notes: { say: "Wipe, on a slide with its own background.", time: 5 }, content: <Statement align="center" kicker="transition">wipe</Statement> },
     { id: "blur", title: "blur", transition: "blur", notes: { say: "Blur through.", time: 5 }, content: <Statement align="center" kicker="transition">blur</Statement> },
+    { id: "cube", title: "cube", transition: "cube", theme: "dark", notes: { say: "Cube, the Keynote classic. Two faces sharing an edge.", time: 5 }, content: <Statement align="center" kicker="transition">cube</Statement> },
     {
       id: "video",
       title: "Video with chapters",

@@ -31,6 +31,8 @@
 
   --sn-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --sn-duration: 350ms;
+  --sn-duration-cube: 700ms;
+  --sn-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --sn-step-duration: 240ms;
 }
 
@@ -88,6 +90,7 @@ body {
 .sn-slide {
   position: absolute;
   inset: 0;
+  background: var(--sn-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -172,6 +175,17 @@ html[data-sn-transition="wipe"][data-sn-direction="back"]::view-transition-new(s
 html[data-sn-transition="blur"]::view-transition-old(sn-slide) { animation-name: sn-blur-out; animation-duration: calc(var(--sn-duration) * 0.8); }
 html[data-sn-transition="blur"]::view-transition-new(sn-slide) { animation-name: sn-blur-in; }
 
+/* cube: Keynote's classic. Old and new are two faces sharing an edge that travels across the stage. */
+html[data-sn-transition="cube"]::view-transition-group(sn-slide) { perspective: 130vw; animation-duration: var(--sn-duration-cube); }
+html[data-sn-transition="cube"]::view-transition-image-pair(sn-slide) { transform-style: preserve-3d; animation: sn-cube-zoom var(--sn-duration-cube) var(--sn-ease-in-out); }
+html[data-sn-transition="cube"]::view-transition-old(sn-slide),
+html[data-sn-transition="cube"]::view-transition-new(sn-slide) { animation-duration: var(--sn-duration-cube); animation-timing-function: var(--sn-ease-in-out); backface-visibility: hidden; }
+html[data-sn-transition="cube"][data-sn-direction="forward"]::view-transition-old(sn-slide) { transform-origin: right center; animation-name: sn-cube-out-left; }
+html[data-sn-transition="cube"][data-sn-direction="forward"]::view-transition-new(sn-slide) { transform-origin: left center; animation-name: sn-cube-in-right; }
+html[data-sn-transition="cube"][data-sn-direction="back"]::view-transition-old(sn-slide) { transform-origin: left center; animation-name: sn-cube-out-right; }
+html[data-sn-transition="cube"][data-sn-direction="back"]::view-transition-new(sn-slide) { transform-origin: right center; animation-name: sn-cube-in-left; }
+html[data-sn-transition="cube"]::view-transition-group(sn-stage) { animation-duration: var(--sn-duration-cube); }
+
 /* morph: named elements carry across; the rest crossfades */
 html[data-sn-transition="morph"]::view-transition-old(sn-slide) { animation-name: sn-fade-out; animation-duration: calc(var(--sn-duration) * 0.6); }
 html[data-sn-transition="morph"]::view-transition-new(sn-slide) { animation-name: sn-fade-in; }
@@ -193,6 +207,11 @@ html[data-sn-transition="morph"]::view-transition-new(sn-slide) { animation-name
 @keyframes sn-wipe-in-right { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes sn-wipe-in-left { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0 0 0 0); } }
 @keyframes sn-blur-out { to { opacity: 0; filter: blur(12px); } }
+@keyframes sn-cube-out-left { from { transform: translateX(0) rotateY(0); } to { transform: translateX(-100%) rotateY(-90deg); } }
+@keyframes sn-cube-in-right { from { transform: translateX(100%) rotateY(90deg); } to { transform: translateX(0) rotateY(0); } }
+@keyframes sn-cube-out-right { from { transform: translateX(0) rotateY(0); } to { transform: translateX(100%) rotateY(90deg); } }
+@keyframes sn-cube-in-left { from { transform: translateX(-100%) rotateY(-90deg); } to { transform: translateX(0) rotateY(0); } }
+@keyframes sn-cube-zoom { 0%, 100% { transform: translateZ(0); } 50% { transform: translateZ(-18vw); } }
 @keyframes sn-blur-in { from { opacity: 0; filter: blur(12px); } }
 
 @media (prefers-reduced-motion: reduce) {

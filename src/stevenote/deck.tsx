@@ -205,7 +205,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (targetOwnsKey(e)) return;
+      if (e.target !== null && targetOwnsKey(e)) return;
       if (prefsOpen) {
         const rows = PREF_ROWS.length + 1;
         if (e.key === "ArrowDown" || e.key === "Tab") setPrefsRow((r) => (r + 1) % rows);
@@ -281,8 +281,18 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return;
       }
     };
+    // Keys pressed inside an embedded iframe (a live component on another origin) arrive as messages.
+    const onMessage = (e: MessageEvent) => {
+      const m = e.data as { source?: string; type?: string; key?: string; shiftKey?: boolean } | null;
+      if (!m || m.source !== "stevenote-embed" || m.type !== "key" || typeof m.key !== "string") return;
+      onKey(new KeyboardEvent("keydown", { key: m.key, shiftKey: !!m.shiftKey }));
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("message", onMessage);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("message", onMessage);
+    };
   }, [apply, deck.slides.length, goto, help, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry]);
 
   /* ---- cursor: hide after two seconds still ---- */

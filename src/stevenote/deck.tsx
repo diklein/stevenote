@@ -8,6 +8,8 @@ import { openChannel, readSnapshot, writeSnapshot, type NavAction, type SyncMess
 import { runTransition, type Direction } from "./transitions";
 import { cyclePref, PrefsPanel, PREF_ROWS, usePrefs, type Prefs } from "./prefs";
 import { ReviewFlag, ReviewPanel, useReview } from "./review";
+import { Overview } from "./overview";
+import { Shortcuts } from "./shortcuts";
 import { initialState, type DeckDef, type DeckState, type TransitionName } from "./types";
 
 /**
@@ -26,6 +28,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   }, [setPrefs]);
   const [prefsOpen, setPrefsOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const { review, source: reviewSource, save: saveReview } = useReview(deck.id, reviewOpen ? deck.slides[state.slide]?.id : null);
   const [prefsRow, setPrefsRow] = useState(0);
   const hurry = prefs.hurry;
@@ -212,6 +215,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target !== null && targetOwnsKey(e)) return;
+      if (overviewOpen) return; // the overview handles its own keys
       if (prefsOpen) {
         const rows = PREF_ROWS.length + 1;
         if (e.key === "ArrowDown" || e.key === "Tab") setPrefsRow((r) => (r + 1) % rows);
@@ -286,6 +290,10 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return openNotes();
         case "help":
           return setHelp((v) => !v);
+        case "overview":
+          setHelp(false);
+          setReviewOpen(false);
+          return setOverviewOpen(true);
         case "hurry":
           return setHurry((v: boolean) => !v);
         case "backup":
@@ -318,7 +326,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("message", onMessage);
     };
-  }, [apply, deck.slides, goto, help, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry, reviewOpen, review, saveReview]);
+  }, [apply, deck.slides, goto, help, overviewOpen, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry, reviewOpen, review, saveReview]);
 
   /* ---- cursor: hide after two seconds still ---- */
   useEffect(() => {
@@ -351,6 +359,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   }, [prefs.motion]);
 
   return (
+    <>
     <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
       {prefs.reviewFlags && <ReviewFlag key={deck.slides[state.slide]?.id} approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} updatedAt={review[deck.slides[state.slide]?.id]?.updatedAt} />}
       {reviewOpen && (
@@ -392,23 +401,24 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         </div>
       )}
       {help && !prefsOpen && (
-        <div className="sn-help" role="dialog" aria-label="Keyboard shortcuts">
-          <div className="muted" style={{ marginBottom: "0.8cqi", fontSize: "0.85em" }}>
-            View transitions: {"startViewTransition" in document ? "supported" : "not supported in this browser"}. OS reduce motion: {window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "on" : "off"}. Motion preference: {prefs.motion}.
-          </div>
-          <div><kbd>→</kbd><kbd>Space</kbd> next step or slide</div>
-          <div><kbd>←</kbd><kbd>⇧Space</kbd> back</div>
-          <div><kbd>B</kbd><kbd>.</kbd> black <kbd>W</kbd> white</div>
-          <div><kbd>S</kbd> notes window <kbd>F</kbd> fullscreen</div>
-          <div>A slide number then <kbd>Enter</kbd> to jump</div>
-          <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
-          <div><kbd>X</kbd> swap a live component for its backup video</div>
-          <div><kbd>/</kbd> feedback on this slide <kbd>A</kbd> approve <kbd>⇧A</kbd> show or hide flags</div>
-          <div><kbd>G</kbd> grid overlay</div>
-          <div><kbd>,</kbd> preferences</div>
-          <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
-        </div>
+        <Shortcuts
+          status={`View transitions ${"startViewTransition" in document ? "supported" : "not supported in this browser"}. OS reduce motion ${window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "on" : "off"}. Motion preference: ${prefs.motion}.`}
+        />
       )}
     </Stage>
+    {overviewOpen && (
+      <Overview
+        deck={deck}
+        current={state.slide}
+        stepCounts={stepCounts}
+        review={review}
+        onJump={(i) => {
+          setOverviewOpen(false);
+          goto(i);
+        }}
+        onClose={() => setOverviewOpen(false)}
+      />
+    )}
+    </>
   );
 }

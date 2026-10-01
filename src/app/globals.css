@@ -394,3 +394,42 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 @media (prefers-reduced-motion: reduce) { .sn-spinner { animation-duration: 2.4s; } }
 .sn-review-reply { margin: 0; padding: 0.8cqi 1cqi; border-radius: 0.6cqi; background: oklch(60% 0.17 150 / 0.18); color: oklch(88% 0.08 150); line-height: 1.4; }
 .sn-review textarea[readonly] { opacity: 0.6; }
+
+/* ---- overview: every slide in a scrolling grid ---- */
+.sn-overview { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; background: oklch(13% 0 0 / 0.97); color: white; font-family: var(--sn-font-sans); backdrop-filter: blur(12px); }
+.sn-overview-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 20px 32px; border-bottom: 1px solid oklch(100% 0 0 / 0.1); font-size: 14px; }
+.sn-overview-head .muted { color: oklch(65% 0 0); }
+.sn-overview-bar { width: 120px; height: 4px; border-radius: 2px; background: oklch(100% 0 0 / 0.12); overflow: hidden; }
+.sn-overview-bar > i { display: block; height: 100%; background: oklch(68% 0.17 150); }
+.sn-overview-filter { border: 1px solid oklch(100% 0 0 / 0.2); background: transparent; color: white; border-radius: 999px; padding: 4px 12px; font: inherit; cursor: pointer; }
+.sn-overview-filter[data-on] { background: white; color: black; }
+.sn-overview-filter kbd, .sn-overview-keys kbd { font-family: var(--sn-font-mono); font-size: 0.85em; opacity: 0.6; }
+.sn-overview-keys { margin-left: auto; }
+.sn-overview-grid { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px 16px; padding: 24px 32px 48px; align-content: start; }
+.sn-overview-tile { display: grid; gap: 8px; padding: 0; border: 0; background: none; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.sn-overview-thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: oklch(20% 0 0); outline: 2px solid transparent; outline-offset: 2px; transition: outline-color 120ms; }
+.sn-overview-thumb > .sn-viewport { position: absolute; inset: 0; }
+.sn-overview-thumb .sn-stage { width: 100%; }
+.sn-overview-tile[data-selected] .sn-overview-thumb { outline-color: oklch(100% 0 0 / 0.5); }
+.sn-overview-tile[data-current] .sn-overview-thumb { outline-color: oklch(62% 0.19 255); }
+.sn-overview-tile:focus-visible { outline: none; }
+.sn-overview-meta { display: flex; align-items: baseline; gap: 8px; font-size: 13px; min-width: 0; }
+.sn-overview-num { font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; color: oklch(60% 0 0); }
+.sn-overview-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sn-overview-tag { flex: none; font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 999px; }
+.sn-overview-tag[data-kind="approved"] { background: oklch(60% 0.17 150 / 0.25); color: oklch(85% 0.12 150); }
+.sn-overview-tag[data-kind="feedback"] { background: oklch(75% 0.15 80 / 0.2); color: oklch(88% 0.12 85); }
+.sn-overview-tag[data-kind="busy"] { background: oklch(55% 0.2 260 / 0.3); color: oklch(85% 0.08 260); }
+
+/* ---- keyboard shortcuts sheet ---- */
+.sn-shortcuts { position: absolute; inset: 0; z-index: 55; display: grid; align-content: center; gap: 2.4cqi; padding: 3cqi 6cqi; background: oklch(10% 0 0 / 0.94); color: white; backdrop-filter: blur(14px); font-family: var(--sn-font-sans); font-size: 1.05cqi; }
+.sn-shortcuts .muted { color: oklch(62% 0 0); }
+.sn-shortcuts-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.5cqi; }
+.sn-shortcuts-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4cqi; align-items: start; }
+.sn-shortcuts h3 { font-size: 0.85cqi; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(62% 0 0); margin: 0 0 1.2cqi; }
+.sn-shortcuts dl { display: grid; gap: 0.7cqi; margin: 0; }
+.sn-shortcuts dl > div { display: grid; grid-template-columns: 9cqi 1fr; gap: 1cqi; align-items: baseline; }
+.sn-shortcuts dt { display: flex; flex-wrap: wrap; gap: 0.4cqi; }
+.sn-shortcuts dd { margin: 0; line-height: 1.35; }
+.sn-shortcuts kbd { display: inline-block; min-width: 1.8cqi; padding: 0 0.5cqi; text-align: center; border: 1px solid oklch(100% 0 0 / 0.28); border-bottom-width: 2px; border-radius: 0.4cqi; font-size: 0.9em; }
+.sn-shortcuts-foot { font-size: 0.85em; }

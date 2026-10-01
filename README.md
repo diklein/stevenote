@@ -116,7 +116,8 @@ Press `/` on any slide for a feedback panel. Esc closes and keeps the draft; ⌘
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
 | G | grid overlay |
-| ? | help |
+| O | overview: every slide in a grid with its review state; click or Enter to jump, U shows only slides not yet approved |
+| ? | keyboard shortcuts sheet |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.
 

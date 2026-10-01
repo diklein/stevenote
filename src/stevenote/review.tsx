@@ -163,8 +163,22 @@ function StatusPill({ status }: { status?: ReviewStatus | null }) {
   );
 }
 
-/** A small flag in the corner of the stage: the submit status while one is in flight, otherwise a check when approved. */
-export function ReviewFlag({ approved, status }: { approved: boolean; hasFeedback?: boolean; status?: ReviewStatus | null }) {
+const FLAG_VISIBLE_MS = 10_000;
+
+/**
+ * A small flag in the corner of the stage, confirming a change: the submit status while one is in flight,
+ * then "Updated" or the approval check, each for ten seconds after it happened. The panel keeps the record.
+ */
+export function ReviewFlag({ approved, status, updatedAt }: { approved: boolean; hasFeedback?: boolean; status?: ReviewStatus | null; updatedAt?: string }) {
+  const [expired, setExpired] = useState<string | null>(null);
+  const settled = status === "done" || (!status && approved);
+  useEffect(() => {
+    if (!settled || !updatedAt) return;
+    const left = FLAG_VISIBLE_MS - (Date.now() - Date.parse(updatedAt));
+    const t = setTimeout(() => setExpired(updatedAt), Math.max(0, left));
+    return () => clearTimeout(t);
+  }, [settled, updatedAt]);
+  if (settled && expired === updatedAt) return null;
   if (status) return <div className="sn-flag-status"><StatusPill status={status} /></div>;
   if (!approved) return null;
   return (

@@ -61,7 +61,7 @@ export const PREF_ROWS: Row[] = [
   { key: "theme", label: "Theme", values: ["deck", "light", "dark"], show: (v) => (v === "deck" ? "as authored" : String(v)) } as Row<"theme">,
   { key: "motion", label: "Motion", values: ["auto", "full", "reduced"], show: (v) => (v === "reduced" ? "reduced: 120ms crossfades" : v === "full" ? "full, even if the OS says reduce" : "follow the OS setting") } as Row<"motion">,
   { key: "dimVideo", label: "Dim around playing video", values: [true, false], show: (v) => (v ? "on" : "off") } as Row<"dimVideo">,
-  { key: "counter", label: "Slide counter", values: ["hover", "always", "never"], show: (v) => String(v) } as Row<"counter">,
+  { key: "counter", label: "Counter and progress", values: ["hover", "always", "never"], show: (v) => String(v) } as Row<"counter">,
   { key: "hideCursor", label: "Hide idle cursor", values: [true, false], show: (v) => (v ? "on" : "off") } as Row<"hideCursor">,
   { key: "letterbox", label: "Letterbox", values: ["black", "stage"], show: (v) => (v === "stage" ? "stage colour" : "black") } as Row<"letterbox">,
   { key: "typeScale", label: "Type size", values: [0.9, 1, 1.1, 1.2], show: (v) => `${Math.round(Number(v) * 100)}%` } as Row<"typeScale">,

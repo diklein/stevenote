@@ -349,7 +349,12 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-prefs-row[data-selected] .sn-prefs-value { color: white; }
 
 /* ---- chrome (progress, counter, help) ---- */
-.sn-progress { position: absolute; left: 0; top: 0; height: 0.25cqi; background: var(--sn-fg); opacity: 0.5; transition: width 300ms var(--sn-ease-out); z-index: 30; }
+.sn-progress { position: absolute; left: 0; top: 0; height: 0.25cqi; background: var(--sn-fg); opacity: 0; transition: width 300ms var(--sn-ease-out), opacity 200ms; z-index: 30; }
+/* The progress bar follows the slide counter preference: on hover by default, always, or never. */
+.sn-stage:hover .sn-progress { opacity: 0.5; }
+.sn-cursor-hidden .sn-progress { opacity: 0; }
+.sn-stage[data-counter="always"] .sn-progress, .sn-cursor-hidden .sn-stage[data-counter="always"] .sn-progress { opacity: 0.5; }
+.sn-stage[data-counter="never"] .sn-progress, .sn-stage[data-counter="never"]:hover .sn-progress { opacity: 0; }
 .sn-counter { position: absolute; right: 2cqi; bottom: 1.4cqi; font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; font-size: 1.1cqi; color: var(--sn-muted); z-index: 30; opacity: 0; transition: opacity 200ms; }
 .sn-stage:hover .sn-counter { opacity: 1; }
 .sn-cursor-hidden .sn-counter { opacity: 0; }

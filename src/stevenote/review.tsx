@@ -8,27 +8,58 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * through /api/private/review, which a private decks repo implements against its own files.
  * Without that route, the browser's localStorage holds the review for the machine you are on.
  */
-export type SlideReview = { feedback?: string; approved?: boolean; updatedAt?: string };
+/**
+ * The submit loop: Cmd+Enter in the panel marks a slide "submitted". Whoever is editing the deck
+ * (a person, or an agent watching the review file) sets "updating" while they work, then clears the
+ * feedback and sets "done" with a short reply. The page polls, so the flag follows along live.
+ */
+export type ReviewStatus = "submitted" | "updating" | "done";
+export type SlideReview = { feedback?: string; approved?: boolean; status?: ReviewStatus | null; reply?: string | null; updatedAt?: string };
 export type DeckReview = Record<string, SlideReview>;
 
 const KEY = (deckId: string) => `stevenote:review:${deckId}`;
+const POLL_MS = 1500;
 
-export function useReview(deckId: string) {
+export function useReview(deckId: string, editing?: string | null) {
   const [review, setReview] = useState<DeckReview>({});
   const [source, setSource] = useState<"private" | "local" | "loading">("loading");
   const remote = useRef(false);
+  const editingRef = useRef(editing);
+  useEffect(() => {
+    editingRef.current = editing;
+  }, [editing]);
 
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const url = `/api/private/review?deck=${encodeURIComponent(deckId)}`;
+    // Remote wins, except the text of the slide being typed into right now.
+    const merge = (data: DeckReview) =>
+      setReview((prev) => {
+        const id = editingRef.current;
+        if (!id || !prev[id]) return data;
+        return { ...data, [id]: { ...data[id], feedback: prev[id].feedback } };
+      });
+    const poll = async () => {
+      if (cancelled) return;
+      if (document.visibilityState === "visible") {
+        try {
+          const r = await fetch(url, { cache: "no-store" });
+          if (r.ok && !cancelled) merge(((await r.json()) as DeckReview) ?? {});
+        } catch {}
+      }
+      timer = setTimeout(poll, POLL_MS);
+    };
     (async () => {
       try {
-        const r = await fetch(`/api/private/review?deck=${encodeURIComponent(deckId)}`, { cache: "no-store" });
+        const r = await fetch(url, { cache: "no-store" });
         if (r.ok) {
           const data = (await r.json()) as DeckReview;
           if (!cancelled) {
             remote.current = true;
             setReview(data ?? {});
             setSource("private");
+            timer = setTimeout(poll, POLL_MS);
           }
           return;
         }
@@ -45,26 +76,30 @@ export function useReview(deckId: string) {
     })();
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [deckId]);
 
   const save = useCallback(
     (slideId: string, patch: SlideReview) => {
+      const stamped = { ...patch, updatedAt: new Date().toISOString() };
       setReview((prev) => {
-        const next = { ...prev, [slideId]: { ...prev[slideId], ...patch, updatedAt: new Date().toISOString() } };
-        if (remote.current) {
-          fetch(`/api/private/review?deck=${encodeURIComponent(deckId)}`, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ [slideId]: next[slideId] }),
-          }).catch(() => {});
-        } else {
+        const next = { ...prev, [slideId]: { ...prev[slideId], ...stamped } };
+        if (!remote.current) {
           try {
             localStorage.setItem(KEY(deckId), JSON.stringify(next));
           } catch {}
         }
         return next;
       });
+      // Send only the patch, so a stale copy never writes back text someone else already cleared.
+      if (remote.current) {
+        fetch(`/api/private/review?deck=${encodeURIComponent(deckId)}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ [slideId]: stamped }),
+        }).catch(() => {});
+      }
     },
     [deckId],
   );
@@ -72,8 +107,9 @@ export function useReview(deckId: string) {
   return { review, source, save };
 }
 
-/** The feedback panel for one slide. Opens on the slash key; Esc or Cmd+Enter closes and keeps the text. */
-export function ReviewPanel({ slideId, title, index, value, approved, onChange, onToggleApproved, onClose }: { slideId: string; title: string; index: number; value: string; approved: boolean; onChange: (text: string) => void; onToggleApproved: () => void; onClose: () => void }) {
+/** The feedback panel for one slide. Opens on the slash key. Esc closes and keeps the draft; Cmd+Enter submits it. */
+export function ReviewPanel({ slideId, title, index, value, approved, status, reply, canSubmit, onChange, onToggleApproved, onSubmit, onClose }: { slideId: string; title: string; index: number; value: string; approved: boolean; status?: ReviewStatus | null; reply?: string | null; canSubmit: boolean; onChange: (text: string) => void; onToggleApproved: () => void; onSubmit: () => void; onClose: () => void }) {
+  const busy = status === "submitted" || status === "updating";
   const ref = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     ref.current?.focus();
@@ -89,27 +125,47 @@ export function ReviewPanel({ slideId, title, index, value, approved, onChange, 
           {approved ? "✓ Approved" : "Approve"}
         </button>
       </div>
+      {status === "done" && reply && <p className="sn-review-reply">{reply}</p>}
+      {busy && <StatusPill status={status} />}
       <textarea
         ref={ref}
         value={value}
+        readOnly={busy}
         placeholder="What should change on this slide?"
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Escape" || ((e.metaKey || e.ctrlKey) && e.key === "Enter")) {
+          if (e.key === "Escape") {
             e.preventDefault();
             onClose();
+          } else if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+            e.preventDefault();
+            if (canSubmit && !busy && value.trim()) onSubmit();
+            else onClose();
           }
           e.stopPropagation();
         }}
         rows={5}
       />
-      <div className="sn-review-foot muted">Esc or ⌘Enter closes. A toggles approval. Shift+A hides the flags.</div>
+      <div className="sn-review-foot muted">
+        {canSubmit ? "⌘Enter submits. Esc closes and keeps the draft." : "Esc or ⌘Enter closes. Feedback stays in this browser."} A toggles approval. Shift+A hides the flags.
+      </div>
     </div>
   );
 }
 
-/** A small flag in the corner of the stage: approved, or has feedback. */
-export function ReviewFlag({ approved, hasFeedback }: { approved: boolean; hasFeedback: boolean }) {
+function StatusPill({ status }: { status?: ReviewStatus | null }) {
+  const label = status === "updating" ? "Updating" : status === "submitted" ? "Submitted" : "Updated";
+  return (
+    <span className="sn-status" data-status={status ?? undefined} role="status">
+      {status === "done" ? "✓" : <span className="sn-spinner" aria-hidden />}
+      {label}
+    </span>
+  );
+}
+
+/** A small flag in the corner of the stage: working on it, approved, or has feedback. */
+export function ReviewFlag({ approved, hasFeedback, status }: { approved: boolean; hasFeedback: boolean; status?: ReviewStatus | null }) {
+  if (status) return <div className="sn-flag-status"><StatusPill status={status} /></div>;
   if (!approved && !hasFeedback) return null;
   return (
     <div className="sn-flag" data-approved={approved || undefined} data-feedback={hasFeedback || undefined} aria-label={approved ? "Approved" : "Has feedback"}>

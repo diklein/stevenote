@@ -15,7 +15,6 @@ export type DeckCommand =
   | "help"
   | "escape"
   | "hurry"
-  | "jumpStart"
   | "backup"
   | "review"
   | "approve"
@@ -63,8 +62,7 @@ export function commandForKey(e: KeyboardEvent): DeckCommand | null {
     case "-":
     case "_":
       return "hurry";
-    case "g":
-      return "jumpStart";
+
     case "x":
     case "X":
       return "backup";
@@ -74,6 +72,7 @@ export function commandForKey(e: KeyboardEvent): DeckCommand | null {
       return "approve";
     case "A":
       return "flags";
+    case "g":
     case "G":
       return "grid";
     default:

@@ -128,7 +128,7 @@ export default function SystemPage() {
       <Stage deck={typeDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded />
 
       <h2 style={h2}>Grid</h2>
-      <p style={p}>A strict grid: twelve columns between margins of four baselines with one-baseline gutters, on a 1.25cqi baseline. Layouts place content with Grid and Col; type sizes carry line heights that are whole baselines, so text on adjacent columns sits on the same lines. Shift+G in a deck shows the overlay.</p>
+      <p style={p}>A strict grid: twelve columns between margins of four baselines with one-baseline gutters, on a 1.25cqi baseline. Layouts place content with Grid and Col; type sizes carry line heights that are whole baselines, so text on adjacent columns sits on the same lines. G in a deck shows the overlay.</p>
       <Stage deck={gridDeck} state={{ slide: 0, step: 0, blank: null }} stepCounts={{}} embedded prefs={{ transition: "deck", theme: "deck", motion: "auto", dimVideo: true, counter: "hover", hideCursor: true, letterbox: "black", typeScale: 1, hurry: false, reviewFlags: false, gridOverlay: true }} />
 
       <h2 style={h2}>Colour</h2>

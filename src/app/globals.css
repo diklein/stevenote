@@ -385,3 +385,12 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-review-approve[data-on] { background: oklch(60% 0.17 150); border-color: transparent; color: white; }
 .sn-flag { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; width: 2.6cqi; height: 2.6cqi; border-radius: 50%; display: grid; place-items: center; font-size: 1.4cqi; font-weight: 600; color: white; background: oklch(70% 0.15 80); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); }
 .sn-flag[data-approved] { background: oklch(60% 0.17 150); }
+.sn-flag-status { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; }
+.sn-status { display: inline-flex; align-items: center; gap: 0.7cqi; padding: 0.5cqi 1.2cqi; border-radius: 999px; font-size: 1.2cqi; font-weight: 500; color: white; background: oklch(55% 0.2 260); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); justify-self: start; }
+.sn-status[data-status="submitted"] { background: oklch(45% 0 0); }
+.sn-status[data-status="done"] { background: oklch(60% 0.17 150); }
+.sn-spinner { width: 1cqi; height: 1cqi; border-radius: 50%; border: 0.18cqi solid oklch(100% 0 0 / 0.35); border-top-color: white; animation: sn-spin 0.8s linear infinite; }
+@keyframes sn-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sn-spinner { animation-duration: 2.4s; } }
+.sn-review-reply { margin: 0; padding: 0.8cqi 1cqi; border-radius: 0.6cqi; background: oklch(60% 0.17 150 / 0.18); color: oklch(88% 0.08 150); line-height: 1.4; }
+.sn-review textarea[readonly] { opacity: 0.6; }

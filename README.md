@@ -57,7 +57,7 @@ Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per c
 
 ## The grid
 
-Every slide sits on a twelve-column grid built from one unit, the baseline (1.25cqi): margins of four baselines, gutters of one. Type sizes are whole or half baselines (`--sn-step--1` at 1 to `--sn-step-6` at 10) and line heights are whole baselines, so the type size preference scales the baseline and everything stays aligned. `Grid` and `Col` place content (`<Col span={7}>`, `<Col span={5} start={8}>`); the built-in layouts already use them. Type steps come with line heights that are whole baselines (`--sn-lh-0` to `--sn-lh-6`), and spacing should be in baselines too (`calc(var(--sn-base) * 2)`). Press `⇧G` to see the overlay, or open a deck with `?grid=1`.
+Every slide sits on a twelve-column grid built from one unit, the baseline (1.25cqi): margins of four baselines, gutters of one. Type sizes are whole or half baselines (`--sn-step--1` at 1 to `--sn-step-6` at 10) and line heights are whole baselines, so the type size preference scales the baseline and everything stays aligned. `Grid` and `Col` place content (`<Col span={7}>`, `<Col span={5} start={8}>`); the built-in layouts already use them. Type steps come with line heights that are whole baselines (`--sn-lh-0` to `--sn-lh-6`), and spacing should be in baselines too (`calc(var(--sn-base) * 2)`). Press `G` to see the overlay, or open a deck with `?grid=1`.
 
 ## Live components and backup videos
 
@@ -94,7 +94,7 @@ Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `sr
 
 ## Review
 
-Press `/` on any slide for a feedback panel; type, then Esc or ⌘Enter. `A` toggles the slide's approval; `⇧A` shows or hides the flags in the corner (a green check for approved, an amber dot for feedback). The notes window shows both. The deck stores nothing: it reads and writes `/api/private/review?deck=<id>`, which a private decks repo implements against its own files (see the decks repo's `src/api.ts`); without that route the browser's localStorage holds the review.
+Press `/` on any slide for a feedback panel. Esc closes and keeps the draft; ⌘Enter submits it, and the corner shows Submitted, then Updating, then Updated with a reply. Whoever edits the deck watches for submissions with `node scripts/review.mjs watch <review.json>` and reports progress with `node scripts/review.mjs set <review.json> <slide> updating|done "reply"`; done clears the feedback unless it changed while the work was underway. The page polls, so the flag follows along live. `A` toggles the slide's approval; `⇧A` shows or hides the flags in the corner (a green check for approved, an amber dot for feedback). The notes window shows both. The deck stores nothing: it reads and writes `/api/private/review?deck=<id>`, which a private decks repo implements against its own files (see the decks repo's `src/api.ts`); without that route the browser's localStorage holds the review.
 
 ## Design system
 
@@ -110,12 +110,12 @@ Press `/` on any slide for a feedback panel; type, then Esc or ⌘Enter. `A` tog
 | B or period, W | blank to black, to white |
 | S or Shift+N | open the notes window |
 | F | fullscreen |
-| G, digits, Enter | jump to a slide |
+| digits, Enter | jump to a slide |
 | minus | hurry mode (skips `skippable` slides) |
 | X | swap a live component for its backup video |
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
-| Shift+G | grid overlay |
+| G | grid overlay |
 | ? | help |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.

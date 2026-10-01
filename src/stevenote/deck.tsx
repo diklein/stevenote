@@ -25,8 +25,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
     if (new URLSearchParams(window.location.search).get("grid") === "1") setPrefs((p) => ({ ...p, gridOverlay: true }));
   }, [setPrefs]);
   const [prefsOpen, setPrefsOpen] = useState(false);
-  const { review, save: saveReview } = useReview(deck.id);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const { review, source: reviewSource, save: saveReview } = useReview(deck.id, reviewOpen ? deck.slides[state.slide]?.id : null);
   const [prefsRow, setPrefsRow] = useState(0);
   const hurry = prefs.hurry;
   const setHurry = useCallback((v: boolean | ((h: boolean) => boolean)) => setPrefs((p) => ({ ...p, hurry: typeof v === "function" ? v(p.hurry) : v })), [setPrefs]);
@@ -236,6 +236,12 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
         e.preventDefault();
         return;
       }
+      // Type a slide number, then Enter, to jump (as in Keynote).
+      if (jump === null && /^\d$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        setJump(e.key);
+        e.preventDefault();
+        return;
+      }
       if (jump !== null) {
         if (/^\d$/.test(e.key)) {
           setJump(jump + e.key);
@@ -249,7 +255,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           e.preventDefault();
           return;
         }
-        if (e.key === "Escape" || e.key === "g" || e.key === "G") {
+        if (e.key === "Escape") {
           setJump(null);
           e.preventDefault();
           return;
@@ -282,8 +288,6 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return setHelp((v) => !v);
         case "hurry":
           return setHurry((v: boolean) => !v);
-        case "jumpStart":
-          return setJump("");
         case "backup":
           return window.dispatchEvent(new CustomEvent("stevenote:toggle-backup"));
         case "review":
@@ -348,7 +352,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   return (
     <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
-      {prefs.reviewFlags && <ReviewFlag approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} />}
+      {prefs.reviewFlags && <ReviewFlag approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} />}
       {reviewOpen && (
         <ReviewPanel
           slideId={deck.slides[state.slide].id}
@@ -356,8 +360,15 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           index={state.slide}
           value={review[deck.slides[state.slide].id]?.feedback ?? ""}
           approved={!!review[deck.slides[state.slide].id]?.approved}
-          onChange={(text) => saveReview(deck.slides[state.slide].id, { feedback: text })}
+          status={review[deck.slides[state.slide].id]?.status}
+          reply={review[deck.slides[state.slide].id]?.reply}
+          canSubmit={reviewSource === "private"}
+          onChange={(text) => saveReview(deck.slides[state.slide].id, { feedback: text, ...(review[deck.slides[state.slide].id]?.status === "done" ? { status: null, reply: null } : {}) })}
           onToggleApproved={() => saveReview(deck.slides[state.slide].id, { approved: !review[deck.slides[state.slide].id]?.approved })}
+          onSubmit={() => {
+            saveReview(deck.slides[state.slide].id, { status: "submitted", reply: null });
+            setReviewOpen(false);
+          }}
           onClose={() => setReviewOpen(false)}
         />
       )}
@@ -389,11 +400,11 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           <div><kbd>←</kbd><kbd>⇧Space</kbd> back</div>
           <div><kbd>B</kbd><kbd>.</kbd> black <kbd>W</kbd> white</div>
           <div><kbd>S</kbd> notes window <kbd>F</kbd> fullscreen</div>
-          <div><kbd>G</kbd> then a number then Enter to jump</div>
+          <div>A slide number then <kbd>Enter</kbd> to jump</div>
           <div><kbd>-</kbd> hurry mode <kbd>Home</kbd><kbd>End</kbd> ends</div>
           <div><kbd>X</kbd> swap a live component for its backup video</div>
           <div><kbd>/</kbd> feedback on this slide <kbd>A</kbd> approve <kbd>⇧A</kbd> show or hide flags</div>
-          <div><kbd>⇧G</kbd> grid overlay</div>
+          <div><kbd>G</kbd> grid overlay</div>
           <div><kbd>,</kbd> preferences</div>
           <div><kbd>?</kbd> this help <kbd>Esc</kbd> close</div>
         </div>

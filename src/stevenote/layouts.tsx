@@ -97,12 +97,13 @@ export function Col({ span = 12, start, align, children, style, className }: { s
 
 /* ---------- layouts, on the grid ---------- */
 
-export function Statement({ kicker, children, sub, align = "left" }: { kicker?: ReactNode; children: ReactNode; sub?: ReactNode; align?: "left" | "center" }) {
+/** A single large statement. `size` steps it down for longer sentences (5 is the default; 4 fits about twice the words). */
+export function Statement({ kicker, children, sub, align = "left", size = 5 }: { kicker?: ReactNode; children: ReactNode; sub?: ReactNode; align?: "left" | "center"; size?: 4 | 5 }) {
   return (
     <Grid>
       <Col span={10} start={align === "center" ? 2 : 1} style={{ textAlign: align }}>
         {kicker && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginBottom: "var(--sn-base)" }}>{kicker}</p>}
-        <h2 style={{ fontSize: "var(--sn-step-5)", lineHeight: "var(--sn-lh-5)" }}>{children}</h2>
+        <h2 style={{ fontSize: `var(--sn-step-${size})`, lineHeight: `var(--sn-lh-${size})` }}>{children}</h2>
         {sub && <div className="muted" style={{ fontSize: "var(--sn-step-2)", lineHeight: "var(--sn-lh-2)", marginTop: "calc(var(--sn-base) * 2)", maxWidth: align === "center" ? undefined : "calc(var(--sn-col) * 8 + var(--sn-gutter) * 7)" }}>{sub}</div>}
       </Col>
     </Grid>

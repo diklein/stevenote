@@ -64,7 +64,9 @@ export function Overview({ deck, current, stepCounts, review, onJump, onClose }:
           const r = review[s.id];
           const busy = r?.status === "submitted" || r?.status === "updating";
           return (
-            <button key={s.id} type="button" data-i={i} className="sn-overview-tile" data-current={i === current || undefined} data-selected={i === sel || undefined} onClick={() => onJump(i)} onMouseEnter={() => setSel(i)}>
+            <div key={s.id} data-i={i} className="sn-overview-tile" data-current={i === current || undefined} data-selected={i === sel || undefined} onMouseEnter={() => setSel(i)}>
+              {/* One click target over the whole tile; the thumbnail inside is inert, so its own buttons never nest in this one. */}
+              <button type="button" className="sn-overview-hit" aria-label={`Slide ${i + 1}: ${s.title ?? s.id}`} onClick={() => onJump(i)} />
               <Thumb deck={deck} index={i} step={stepCounts[i] ?? 0} />
               <span className="sn-overview-meta">
                 <span className="sn-overview-num">{i + 1}</span>
@@ -73,7 +75,7 @@ export function Overview({ deck, current, stepCounts, review, onJump, onClose }:
                 {busy && <span className="sn-overview-tag" data-kind="busy">{r?.status === "updating" ? "Updating" : "Submitted"}</span>}
                 {!busy && r?.feedback?.trim() && <span className="sn-overview-tag" data-kind="feedback">Feedback</span>}
               </span>
-            </button>
+            </div>
           );
         })}
         {shown.length === 0 && <p className="muted">Every slide is approved.</p>}
@@ -82,20 +84,34 @@ export function Overview({ deck, current, stepCounts, review, onJump, onClose }:
   );
 }
 
-/** One slide, rendered small, mounted when it scrolls near the viewport. */
+/**
+ * One slide, mounted when it scrolls near the viewport. It renders at presentation size and is scaled
+ * down as a picture, so components sized in pixels look the way they do on the real slide.
+ */
+const RENDER_W = 1600;
 function Thumb({ deck, index, step }: { deck: Deck; index: number; step: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
+  const [scale, setScale] = useState(0);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), { rootMargin: "400px" });
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / RENDER_W));
     io.observe(el);
-    return () => io.disconnect();
+    ro.observe(el);
+    return () => {
+      io.disconnect();
+      ro.disconnect();
+    };
   }, []);
   return (
     <div ref={ref} className="sn-overview-thumb">
-      {near && <Stage deck={deck} state={{ slide: index, step, blank: null }} stepCounts={{}} preview />}
+      {near && scale > 0 && (
+        <div className="sn-overview-render" style={{ width: RENDER_W, height: (RENDER_W * 9) / 16, transform: `scale(${scale})` }}>
+          <Stage deck={deck} state={{ slide: index, step, blank: null }} stepCounts={{}} preview />
+        </div>
+      )}
     </div>
   );
 }

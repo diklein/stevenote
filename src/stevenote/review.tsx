@@ -170,7 +170,8 @@ const FLAG_VISIBLE_MS = 10_000;
  * then "Updated" or the approval check, each for ten seconds after it happened. The panel keeps the record.
  */
 export function ReviewFlag({ approved, status, updatedAt }: { approved: boolean; hasFeedback?: boolean; status?: ReviewStatus | null; updatedAt?: string }) {
-  const [expired, setExpired] = useState<string | null>(null);
+  // Anything already older than the window starts expired, so returning to an old slide shows nothing.
+  const [expired, setExpired] = useState<string | null>(() => (updatedAt && Date.now() - Date.parse(updatedAt) > FLAG_VISIBLE_MS ? updatedAt : null));
   const settled = status === "done" || (!status && approved);
   useEffect(() => {
     if (!settled || !updatedAt) return;

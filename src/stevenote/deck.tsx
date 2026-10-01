@@ -352,7 +352,7 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
 
   return (
     <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
-      {prefs.reviewFlags && <ReviewFlag approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} updatedAt={review[deck.slides[state.slide]?.id]?.updatedAt} />}
+      {prefs.reviewFlags && <ReviewFlag key={deck.slides[state.slide]?.id} approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} updatedAt={review[deck.slides[state.slide]?.id]?.updatedAt} />}
       {reviewOpen && (
         <ReviewPanel
           slideId={deck.slides[state.slide].id}

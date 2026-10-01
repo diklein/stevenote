@@ -59,7 +59,7 @@ export function Stage({
           })}
           {chrome && (
             <>
-              <div className="sn-progress" style={{ width: `${((state.slide + 1) / deck.slides.length) * 100}%` }} />
+              {prefs?.progress && <div className="sn-progress" style={{ width: `${((state.slide + 1) / deck.slides.length) * 100}%` }} />}
               <div className="sn-counter">
                 {state.slide + 1} / {deck.slides.length}
               </div>

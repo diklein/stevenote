@@ -163,13 +163,13 @@ function StatusPill({ status }: { status?: ReviewStatus | null }) {
   );
 }
 
-/** A small flag in the corner of the stage: working on it, approved, or has feedback. */
-export function ReviewFlag({ approved, hasFeedback, status }: { approved: boolean; hasFeedback: boolean; status?: ReviewStatus | null }) {
+/** A small flag in the corner of the stage: the submit status while one is in flight, otherwise a check when approved. */
+export function ReviewFlag({ approved, status }: { approved: boolean; hasFeedback?: boolean; status?: ReviewStatus | null }) {
   if (status) return <div className="sn-flag-status"><StatusPill status={status} /></div>;
-  if (!approved && !hasFeedback) return null;
+  if (!approved) return null;
   return (
-    <div className="sn-flag" data-approved={approved || undefined} data-feedback={hasFeedback || undefined} aria-label={approved ? "Approved" : "Has feedback"}>
-      {approved ? "✓" : "…"}
+    <div className="sn-flag" data-approved aria-label="Approved">
+      ✓
     </div>
   );
 }

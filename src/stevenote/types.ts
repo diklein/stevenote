@@ -30,6 +30,8 @@ export type SlideDef = {
   skippable?: boolean;
   /** Kept after the end for questions; next() stops before it. */
   bonus?: boolean;
+  /** Section name; consecutive slides with the same section are grouped in the overview. */
+  section?: string;
   /** Token overrides, e.g. { "--sn-bg": "oklch(30% 0.1 250)" }. */
   style?: CSSProperties;
 };

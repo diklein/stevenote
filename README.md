@@ -116,8 +116,8 @@ Press `/` on any slide for a feedback panel. Esc closes and keeps the draft; ⌘
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
 | G | grid overlay |
-| O | overview: every slide in a grid with its review state; click or Enter to jump, U shows only slides not yet approved |
-| ? | keyboard shortcuts sheet |
+| O | overview: every slide in a grid, grouped by `section`, with its review state; click or Enter goes there, / searches titles, U and F filter to not approved or with feedback |
+| ? | keyboard shortcuts, in tabs for presenting, reviewing and the slide grid; built from the same table as the key handling (`BINDINGS` in keyboard.ts) |
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.
 

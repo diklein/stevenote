@@ -112,15 +112,16 @@ export function Statement({ kicker, children, sub, align = "left", size = 5 }: {
 }
 
 /** A huge number with one claim and a bare source. Counts up when the slide becomes active. */
-export function Stat({ value, format, claim, source, duration = 1100 }: { value: number; format?: (n: number) => string; claim: ReactNode; source?: ReactNode; duration?: number }) {
+export function Stat({ value, format, claim, source, duration = 1100, bearing = -0.06 }: { value: number; format?: (n: number) => string; claim: ReactNode; source?: ReactNode; duration?: number; bearing?: number }) {
   const shown = useCountUp(value, duration);
   const fmt = format ?? ((n: number) => Math.round(n).toLocaleString());
   return (
     <Grid>
       <Col span={10}>
-        <div className="tabular" style={{ fontSize: "var(--sn-step-6)", lineHeight: "var(--sn-lh-6)", fontWeight: 600, letterSpacing: "-0.04em", fontFamily: "var(--sn-font-display)" }}>{fmt(shown)}</div>
-        <p style={{ fontSize: "var(--sn-step-3)", lineHeight: "var(--sn-lh-3)", marginTop: "var(--sn-base)", fontWeight: 500, letterSpacing: "-0.01em", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{claim}</p>
-        {source && <p className="muted" style={{ fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)", marginTop: "var(--sn-base)" }}>{source}</p>}
+        {/* Figures carry side bearings that grow with size; pull the number back so its first stem meets the column edge. */}
+        <Baseline><div className="tabular" style={{ fontSize: "var(--sn-step-6)", lineHeight: "var(--sn-lh-6)", fontWeight: 600, letterSpacing: "-0.04em", fontFamily: "var(--sn-font-display)", marginLeft: `${bearing}em` }}>{fmt(shown)}</div></Baseline>
+        <Baseline><p style={{ fontSize: "var(--sn-step-3)", lineHeight: "var(--sn-lh-3)", marginTop: "var(--sn-base)", fontWeight: 500, letterSpacing: "-0.01em", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{claim}</p></Baseline>
+        {source && <Baseline><p className="muted" style={{ fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)", marginTop: "var(--sn-base)" }}>{source}</p></Baseline>}
       </Col>
     </Grid>
   );

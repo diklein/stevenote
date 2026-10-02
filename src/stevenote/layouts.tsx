@@ -3,6 +3,7 @@
 import { Children, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useSlide } from "./context";
 import { useStep, type StepState } from "./steps";
+import { Baseline } from "./baseline";
 
 /* ---------- builds ---------- */
 
@@ -102,9 +103,9 @@ export function Statement({ kicker, children, sub, align = "left", size = 5 }: {
   return (
     <Grid>
       <Col span={10} start={align === "center" ? 2 : 1} style={{ textAlign: align }}>
-        {kicker && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginBottom: "var(--sn-base)" }}>{kicker}</p>}
-        <h2 style={{ fontSize: `var(--sn-step-${size})`, lineHeight: `var(--sn-lh-${size})` }}>{children}</h2>
-        {sub && <div className="muted" style={{ fontSize: "var(--sn-step-2)", lineHeight: "var(--sn-lh-2)", marginTop: "calc(var(--sn-base) * 2)", maxWidth: align === "center" ? undefined : "calc(var(--sn-col) * 8 + var(--sn-gutter) * 7)" }}>{sub}</div>}
+        {kicker && <Baseline><p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", marginBottom: "var(--sn-base)" }}>{kicker}</p></Baseline>}
+        <Baseline><h2 style={{ fontSize: `var(--sn-step-${size})`, lineHeight: `var(--sn-lh-${size})` }}>{children}</h2></Baseline>
+        {sub && <Baseline><div className="muted" style={{ fontSize: "var(--sn-step-2)", lineHeight: "var(--sn-lh-2)", marginTop: "calc(var(--sn-base) * 2)", maxWidth: align === "center" ? undefined : "calc(var(--sn-col) * 8 + var(--sn-gutter) * 7)" }}>{sub}</div></Baseline>}
       </Col>
     </Grid>
   );

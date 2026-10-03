@@ -22,6 +22,7 @@ export function Video({
   showChapter = true,
   restartOnEnter = true,
   dimWhilePlaying = true,
+  maxHeight,
 }: {
   src: string;
   poster?: string;
@@ -32,6 +33,8 @@ export function Video({
   showChapter?: boolean;
   restartOnEnter?: boolean;
   dimWhilePlaying?: boolean;
+  /** Overrides the default cap (the slide height) when the video shares the slide with other content. */
+  maxHeight?: string;
 }) {
   const { active, preview, setFocus } = useSlide();
   const ref = useRef<HTMLVideoElement>(null);
@@ -92,7 +95,7 @@ export function Video({
           playsInline
           loop={loop}
           preload="auto"
-          style={{ maxWidth: "100%", maxHeight: title ? "calc(100cqh - 2 * var(--sn-pad) - var(--sn-lh-3) - var(--sn-base))" : "calc(100cqh - 2 * var(--sn-pad))", borderRadius: "var(--sn-radius)", background: "black" }}
+          style={{ maxWidth: "100%", maxHeight: maxHeight ?? (title ? "calc(100cqh - 2 * var(--sn-pad) - var(--sn-lh-3) - var(--sn-base))" : "calc(100cqh - 2 * var(--sn-pad))"), borderRadius: "var(--sn-radius)", background: "black" }}
         />
         {showChapter && chapter?.label && (
           <div

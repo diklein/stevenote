@@ -50,6 +50,13 @@
   --sn-lh-4: calc(var(--sn-base) * 5);
   --sn-lh-5: calc(var(--sn-base) * 7);
   --sn-lh-6: calc(var(--sn-base) * 11);
+  /* Templates: one title size and place, one list style, for every titled slide. */
+  --sn-title-size: var(--sn-step-3);
+  --sn-title-lh: var(--sn-lh-3);
+  --sn-title-gap: calc(var(--sn-base) * 3);
+  --sn-list-size: var(--sn-step-1);
+  --sn-list-lh: var(--sn-lh-1);
+  --sn-list-gap: calc(var(--sn-base) * 2);
 
   --sn-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --sn-duration: 350ms;
@@ -209,6 +216,13 @@ body {
 
 /* typography inside the stage */
 .sn-stage h1, .sn-stage h2, .sn-stage h3 { font-family: var(--sn-font-display); text-wrap: balance; font-weight: 600; letter-spacing: -0.02em; margin: 0; }
+.sn-title { font-size: var(--sn-title-size); line-height: var(--sn-title-lh); }
+.sn-list { display: grid; gap: var(--sn-list-gap); margin: 0; padding: 0; list-style: none; }
+.sn-list-item { display: flex; gap: 0.6em; font-size: var(--sn-list-size); line-height: var(--sn-list-lh); font-weight: 500; letter-spacing: -0.015em; }
+/* The mark sits in a box one line tall, so it centres on the first line however many lines follow. */
+.sn-list-mark { flex: none; height: var(--sn-list-lh); display: grid; place-items: center; color: var(--sn-muted); }
+.sn-list-mark svg { width: 0.9em; height: 0.9em; }
+.sn-list-mark[data-num] { font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; font-weight: 400; min-width: 1.2em; }
 .sn-stage p, .sn-stage li, .sn-stage dd, .sn-stage dt, .sn-stage blockquote, .sn-stage figcaption { text-wrap: pretty; margin: 0; }
 .sn-stage code, .sn-stage kbd, .sn-stage pre { font-family: var(--sn-font-mono); font-variant-numeric: tabular-nums; }
 .sn-stage .tabular { font-variant-numeric: tabular-nums; }

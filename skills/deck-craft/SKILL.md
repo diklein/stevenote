@@ -34,6 +34,7 @@ Shape the talk before touching a slide. The shape that worked: a person and a pr
 - **Cut what is not part of the story.** A budget column, a before-and-after line on each role, a surprise slide that took four headline rewrites and still detoured. If a slide keeps needing rewrites, the problem is usually that it does not belong.
 - **Light and dark carry the structure.** Dark for the open and the close, light for evidence, live and data in the middle. The background crossfade between them is the only transition the story needs; anything more is decoration.
 - **Drop the presenter's name from every slide.** The deck knows who is speaking.
+- **Use the templates.** Every titled slide uses `Titled` (one title size, one place) and every list uses `List` (one size, spacing and start position). Hand-placed headings and lists drift; a deck reads as one voice when they don't.
 - **Everything stays inside the margins, captions included.** Size a photo to leave room for its caption rather than letting the caption fall into the margin. Only a deliberate full-bleed image may cross them. Check every slide with the overview (O) before calling a pass done.
 
 ## 3. Typography on slides

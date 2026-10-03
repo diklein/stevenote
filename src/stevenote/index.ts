@@ -4,7 +4,7 @@ export { Stage } from "./stage";
 export { useSlide, useDeck } from "./context";
 export { useStep, useStepSpan, useCurrentStep, StepProvider } from "./steps";
 export { Baseline, useBaselineSnap } from "./baseline";
-export { Step, Steps, useStepState, Morph, Grid, Col, Statement, Stat, useCountUp, Evidence, LiveFrame, Columns, Card, Media } from "./layouts";
+export { Step, Steps, useStepState, Morph, Grid, Col, Statement, Stat, Title, Titled, List, Fit, useCountUp, Evidence, LiveFrame, Columns, Card, Media } from "./layouts";
 export { Video } from "./video";
 export { Live } from "./live";
 export { runTransition } from "./transitions";

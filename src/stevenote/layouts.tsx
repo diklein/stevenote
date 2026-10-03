@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Children, useEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from "react";
 import { useSlide } from "./context";
 import { useStep, type StepState } from "./steps";
 import { Baseline } from "./baseline";
@@ -165,14 +165,19 @@ export function Evidence({ headline, children, aside }: { headline: ReactNode; c
 }
 
 /** Frames a live component with a sentence that says what the audience is about to watch. */
-export function LiveFrame({ title, subtitle, compact = false, children }: { title: ReactNode; subtitle?: ReactNode; compact?: boolean; children: ReactNode }) {
+export function LiveFrame({ title, subtitle, children }: { title?: ReactNode; subtitle?: ReactNode; compact?: boolean; children: ReactNode }) {
+  // Same title size and place as every titled slide (see Titled); the live area fills the rest.
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: compact ? "var(--sn-base)" : "calc(var(--sn-base) * 2)", height: "100%" }}>
-      <div>
-        <h2 style={{ fontSize: compact ? "var(--sn-step-2)" : "var(--sn-step-3)", lineHeight: compact ? "var(--sn-lh-2)" : "var(--sn-lh-3)" }}>{title}</h2>
-        {subtitle && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{subtitle}</p>}
+    <div style={{ display: "flex", flexDirection: "column", gap: "var(--sn-title-gap)", height: "100%" }}>
+      {(title || subtitle) && (
+        <div>
+          {title && <Title>{title}</Title>}
+          {subtitle && <p className="muted" style={{ fontSize: "var(--sn-step-1)", lineHeight: "var(--sn-lh-1)", maxWidth: "calc(var(--sn-col) * 9 + var(--sn-gutter) * 8)" }}>{subtitle}</p>}
+        </div>
+      )}
+      <div data-live style={{ flex: 1, minHeight: 0 }}>
+        <Fit>{children}</Fit>
       </div>
-      <div data-live style={{ flex: 1, minHeight: 0 }}>{children}</div>
     </div>
   );
 }
@@ -202,5 +207,108 @@ export function Media({ src, alt, fit = "contain", caption }: { src: string; alt
       <img src={src} alt={alt} style={{ maxWidth: "100%", maxHeight: caption ? "calc(100% - var(--sn-lh-0) - var(--sn-base))" : "100%", minHeight: 0, objectFit: fit, borderRadius: "var(--sn-radius)" }} />
       {caption && <figcaption className="muted" style={{ fontSize: "var(--sn-step-0)", lineHeight: "var(--sn-lh-0)" }}>{caption}</figcaption>}
     </figure>
+  );
+}
+
+/* ---------- templates: every titled slide puts its title in the same place at the same size ---------- */
+
+/** The slide title: one size, one place, snapped to the baseline. */
+export function Title({ children }: { children: ReactNode }) {
+  return (
+    <Baseline>
+      <h2 className="sn-title">{children}</h2>
+    </Baseline>
+  );
+}
+
+/**
+ * A titled slide. The title takes the first row at the top margin; the body is a 12-column grid filling
+ * the rest. Children are Cols, laid out exactly as on an untitled slide.
+ */
+export function Titled({ title, children, bodyStyle }: { title?: ReactNode; children: ReactNode; bodyStyle?: CSSProperties }) {
+  return (
+    <Grid fill style={{ gridTemplateRows: title ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)", rowGap: "var(--sn-title-gap)" }}>
+      {title && (
+        <Col span={12} align="start">
+          <Title>{title}</Title>
+        </Col>
+      )}
+      <Col span={12} style={{ minHeight: 0, height: "100%" }}>
+        <Grid fill style={bodyStyle}>{children}</Grid>
+      </Col>
+    </Grid>
+  );
+}
+
+/**
+ * A titled list. Same item size, spacing and start position on every slide: the list hangs from the top of
+ * the body, never floats. Items can carry icons or numbers; marks centre on the first line.
+ */
+export function List({ title, items, icons, numbered = false, span = 10, stepped = false }: { title?: ReactNode; items: ReactNode[]; icons?: ComponentType<{ "aria-hidden"?: boolean }>[]; numbered?: boolean; span?: number; stepped?: boolean }) {
+  const rows = items.map((it, i) => {
+    const Icon = icons?.[i];
+    const row = (
+      <Baseline key={i}>
+        <li className="sn-list-item">
+          {numbered && <span className="sn-list-mark" data-num>{i + 1}</span>}
+          {Icon && (
+            <span className="sn-list-mark">
+              <Icon aria-hidden />
+            </span>
+          )}
+          <span>{it}</span>
+        </li>
+      </Baseline>
+    );
+    return stepped ? <Step key={i}>{row}</Step> : row;
+  });
+  return (
+    <Titled title={title}>
+      <Col span={span} align="start">
+        <ul className="sn-list">{rows}</ul>
+      </Col>
+    </Titled>
+  );
+}
+
+/**
+ * Scales its content down (never up) so it always fits the height it is given. For live components that
+ * grow as they answer: the stage stays clean whatever the model says. Width stays full after scaling.
+ */
+export function Fit({ children }: { children: ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const o = outer.current;
+    const i = inner.current;
+    if (!o || !i) return;
+    let scale = 1;
+    const fit = () => {
+      const natural = i.scrollHeight;
+      const avail = o.clientHeight;
+      if (!natural || !avail) return;
+      const next = Math.min(1, avail / natural);
+      if (Math.abs(next - scale) < 0.01) return;
+      scale = next;
+      i.style.transform = scale < 1 ? `scale(${scale})` : "";
+      i.style.width = scale < 1 ? `${100 / scale}%` : "";
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(o);
+    ro.observe(i);
+    const mo = new MutationObserver(fit);
+    mo.observe(i, { childList: true, subtree: true, characterData: true });
+    fit();
+    return () => {
+      ro.disconnect();
+      mo.disconnect();
+    };
+  }, []);
+  return (
+    <div ref={outer} style={{ height: "100%", overflow: "hidden" }}>
+      <div ref={inner} style={{ transformOrigin: "0 0" }}>
+        {children}
+      </div>
+    </div>
   );
 }

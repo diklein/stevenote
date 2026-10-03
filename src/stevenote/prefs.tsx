@@ -20,6 +20,7 @@ export type Prefs = {
   typeScale: 0.9 | 1 | 1.1 | 1.2;
   hurry: boolean;
   reviewFlags: boolean;
+  approvalBadges: boolean;
   gridOverlay: boolean;
 };
 
@@ -35,6 +36,7 @@ export const defaultPrefs: Prefs = {
   typeScale: 1,
   hurry: false,
   reviewFlags: true,
+  approvalBadges: false,
   gridOverlay: false,
 };
 
@@ -70,6 +72,7 @@ export const PREF_ROWS: Row[] = [
   { key: "typeScale", label: "Type size", values: [0.9, 1, 1.1, 1.2], show: (v) => `${Math.round(Number(v) * 100)}%` } as Row<"typeScale">,
   { key: "hurry", label: "Hurry mode", values: [false, true], show: (v) => (v ? "on: skipping marked slides" : "off") } as Row<"hurry">,
   { key: "reviewFlags", label: "Review flags", values: [true, false], show: (v) => (v ? "shown" : "hidden") } as Row<"reviewFlags">,
+  { key: "approvalBadges", label: "Approval badges", values: [false, true], show: (v) => (v ? "on every slide" : "off") } as Row<"approvalBadges">,
   { key: "gridOverlay", label: "Grid overlay", values: [false, true], show: (v) => (v ? "shown: 12 columns and the baseline" : "hidden") } as Row<"gridOverlay">,
 ] as Row[];
 

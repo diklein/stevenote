@@ -163,6 +163,16 @@ function StatusPill({ status }: { status?: ReviewStatus | null }) {
   );
 }
 
+/** The always-on badge: Approved or Not approved on every slide, until the option is turned off. A submit in flight shows instead. */
+export function ApprovalBadge({ approved, status }: { approved: boolean; status?: ReviewStatus | null }) {
+  if (status === "submitted" || status === "updating") return <div className="sn-flag-status"><StatusPill status={status} /></div>;
+  return (
+    <div className="sn-flag-status">
+      <span className="sn-badge" data-approved={approved || undefined}>{approved ? "✓ Approved" : "Not approved"}</span>
+    </div>
+  );
+}
+
 const FLAG_VISIBLE_MS = 10_000;
 
 /**

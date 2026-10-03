@@ -385,6 +385,8 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-review-approve[data-on] { background: oklch(60% 0.17 150); border-color: transparent; color: white; }
 .sn-flag { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; width: 2.6cqi; height: 2.6cqi; border-radius: 50%; display: grid; place-items: center; font-size: 1.4cqi; font-weight: 600; color: white; background: oklch(70% 0.15 80); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); }
 .sn-flag[data-approved] { background: oklch(60% 0.17 150); }
+.sn-badge { display: inline-flex; align-items: center; padding: 0.5cqi 1.2cqi; border-radius: 999px; font-family: var(--sn-font-sans); font-size: 1.2cqi; font-weight: 500; color: oklch(92% 0 0); background: oklch(40% 0 0 / 0.85); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); }
+.sn-badge[data-approved] { color: white; background: oklch(60% 0.17 150); }
 .sn-flag-status { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; }
 .sn-status { display: inline-flex; align-items: center; gap: 0.7cqi; padding: 0.5cqi 1.2cqi; border-radius: 999px; font-size: 1.2cqi; font-weight: 500; color: white; background: oklch(55% 0.2 260); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); justify-self: start; }
 .sn-status[data-status="submitted"] { background: oklch(45% 0 0); }

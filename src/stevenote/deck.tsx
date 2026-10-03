@@ -7,7 +7,7 @@ import { clamp, formatHash, parseHash } from "./state";
 import { openChannel, readSnapshot, writeSnapshot, type NavAction, type SyncMessage } from "./sync";
 import { runTransition, type Direction } from "./transitions";
 import { cyclePref, PrefsPanel, PREF_ROWS, usePrefs, type Prefs } from "./prefs";
-import { ReviewFlag, ReviewPanel, useReview } from "./review";
+import { ApprovalBadge, ReviewFlag, ReviewPanel, useReview } from "./review";
 import { Overview } from "./overview";
 import { Shortcuts } from "./shortcuts";
 import { initialState, type DeckDef, type DeckState, type TransitionName } from "./types";
@@ -361,7 +361,8 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   return (
     <>
     <Stage deck={deck} state={state} stepCounts={stepCounts} onStepCount={onStepCount} chrome prefs={prefs}>
-      {prefs.reviewFlags && <ReviewFlag key={deck.slides[state.slide]?.id} approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} updatedAt={review[deck.slides[state.slide]?.id]?.updatedAt} />}
+      {prefs.approvalBadges && <ApprovalBadge approved={!!review[deck.slides[state.slide]?.id]?.approved} status={review[deck.slides[state.slide]?.id]?.status} />}
+      {prefs.reviewFlags && !prefs.approvalBadges && <ReviewFlag key={deck.slides[state.slide]?.id} approved={!!review[deck.slides[state.slide]?.id]?.approved} hasFeedback={!!review[deck.slides[state.slide]?.id]?.feedback?.trim()} status={review[deck.slides[state.slide]?.id]?.status} updatedAt={review[deck.slides[state.slide]?.id]?.updatedAt} />}
       {reviewOpen && (
         <ReviewPanel
           slideId={deck.slides[state.slide].id}

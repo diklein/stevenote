@@ -388,6 +388,10 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-badge { display: inline-flex; align-items: center; padding: 0.5cqi 1.2cqi; border-radius: 999px; font-family: var(--sn-font-sans); font-size: 1.2cqi; font-weight: 500; color: oklch(92% 0 0); background: oklch(40% 0 0 / 0.85); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); }
 .sn-badge[data-approved] { color: white; background: oklch(60% 0.17 150); }
 .sn-flag-status { position: absolute; top: 1.4cqi; right: 1.6cqi; z-index: 35; }
+/* Review badges sit outside the slide transition: they change the instant the slide does, never crossfade. */
+.sn-flag, .sn-flag-status { view-transition-name: sn-review-flag; }
+::view-transition-group(sn-review-flag), ::view-transition-new(sn-review-flag) { animation: none; }
+::view-transition-old(sn-review-flag) { display: none; }
 .sn-status { display: inline-flex; align-items: center; gap: 0.7cqi; padding: 0.5cqi 1.2cqi; border-radius: 999px; font-size: 1.2cqi; font-weight: 500; color: white; background: oklch(55% 0.2 260); box-shadow: 0 0.2cqi 0.8cqi oklch(0% 0 0 / 0.25); justify-self: start; }
 .sn-status[data-status="submitted"] { background: oklch(45% 0 0); }
 .sn-status[data-status="done"] { background: oklch(60% 0.17 150); }

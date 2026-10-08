@@ -5,8 +5,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /**
  * Review: feedback and an approval flag per slide, for iterating on a deck with someone else
  * (or with an agent) between rehearsals. The deck stores nothing itself: it reads and writes
- * through /api/private/review, which a private decks repo implements against its own files.
- * Without that route, the browser's localStorage holds the review for the machine you are on.
+ * through /api/private/review, which a private decks repo implements against its own files (a journal
+ * of every change plus a snapshot folded from it). Without that route, the browser's localStorage holds
+ * the review for the machine you are on; with it, localStorage still keeps a mirror as one more copy.
  */
 /**
  * The submit loop: Cmd+Enter in the panel marks a slide "submitted". Whoever is editing the deck
@@ -80,28 +81,61 @@ export function useReview(deckId: string, editing?: string | null) {
     };
   }, [deckId]);
 
+  // Patches waiting to go to the server. Typing coalesces per slide; anything else goes at once.
+  const pending = useRef<Record<string, SlideReview>>({});
+  const flushTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const flush = useCallback(() => {
+    flushTimer.current = undefined;
+    const body = pending.current;
+    pending.current = {};
+    if (!Object.keys(body).length) return;
+    const send = () =>
+      fetch(`/api/private/review?deck=${encodeURIComponent(deckId)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+        keepalive: true,
+      });
+    // One retry, then the browser mirror still has it (see below) and the next edit carries it along.
+    send().then((r) => (r.ok ? undefined : Promise.reject())).catch(() => send().catch(() => {}));
+  }, [deckId]);
+  useEffect(() => {
+    // Leaving the page flushes what is still coalescing, so a draft typed just before closing is kept.
+    const onHide = () => {
+      if (document.visibilityState === "hidden" && flushTimer.current) {
+        clearTimeout(flushTimer.current);
+        flush();
+      }
+    };
+    document.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      window.removeEventListener("pagehide", onHide);
+    };
+  }, [flush]);
+
   const save = useCallback(
     (slideId: string, patch: SlideReview) => {
       const stamped = { ...patch, updatedAt: new Date().toISOString() };
       setReview((prev) => {
         const next = { ...prev, [slideId]: { ...prev[slideId], ...stamped } };
-        if (!remote.current) {
-          try {
-            localStorage.setItem(KEY(deckId), JSON.stringify(next));
-          } catch {}
-        }
+        // Always keep a copy in this browser, even when the server is the store: one more place it survives.
+        try {
+          localStorage.setItem(KEY(deckId), JSON.stringify(next));
+        } catch {}
         return next;
       });
       // Send only the patch, so a stale copy never writes back text someone else already cleared.
       if (remote.current) {
-        fetch(`/api/private/review?deck=${encodeURIComponent(deckId)}`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ [slideId]: stamped }),
-        }).catch(() => {});
+        pending.current[slideId] = { ...pending.current[slideId], ...stamped };
+        const typingOnly = Object.keys(patch).every((k) => k === "feedback");
+        if (flushTimer.current) clearTimeout(flushTimer.current);
+        if (typingOnly) flushTimer.current = setTimeout(flush, 500);
+        else flush();
       }
     },
-    [deckId],
+    [deckId, flush],
   );
 
   return { review, source, save };

@@ -21,6 +21,11 @@ import { initialState, type DeckDef, type DeckState, type TransitionName } from 
 export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) {
   const [state, setState] = useState<DeckState>(() => ({ ...initialState, ...(parseHash(window.location.hash, deck.slides.length) ?? {}) }));
   const [stepCounts, setStepCounts] = useState<Record<number, number>>({});
+
+  // The tab is named after the deck. Decks defined in client modules are opaque to server metadata.
+  useEffect(() => {
+    document.title = deck.title;
+  }, [deck.title]);
   const [help, setHelp] = useState(false);
   const [prefs, setPrefs] = usePrefs();
   useEffect(() => {
@@ -320,11 +325,19 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
       if (!m || m.source !== "stevenote-embed" || m.type !== "key" || typeof m.key !== "string") return;
       onKey(new KeyboardEvent("keydown", { key: m.key, shiftKey: !!m.shiftKey }));
     };
+    // A live component can ask for the next or previous build itself (a button in a rebuilt screen).
+    const onNav = (e: Event) => {
+      const d = (e as CustomEvent<"next" | "prev">).detail;
+      if (d === "prev") prev();
+      else next();
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("message", onMessage);
+    window.addEventListener("stevenote:nav", onNav);
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("message", onMessage);
+      window.removeEventListener("stevenote:nav", onNav);
     };
   }, [apply, deck.slides, goto, help, overviewOpen, jump, lastIndex, next, openNotes, prev, prefsOpen, prefsRow, setPrefs, setHurry, reviewOpen, review, saveReview]);
 

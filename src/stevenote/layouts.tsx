@@ -275,7 +275,8 @@ export function List({ title, items, icons, numbered = false, span = 10, stepped
  * Scales its content down (never up) so it always fits the height it is given. For live components that
  * grow as they answer: the stage stays clean whatever the model says. Width stays full after scaling.
  */
-export function Fit({ children }: { children: ReactNode }) {
+/** Scales its content down to fit the height it is given. `center` keeps the (scaled) content in the vertical middle. */
+export function Fit({ children, center = false }: { children: ReactNode; center?: boolean }) {
   const outer = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -292,6 +293,8 @@ export function Fit({ children }: { children: ReactNode }) {
       scale = next;
       i.style.transform = scale < 1 ? `scale(${scale})` : "";
       i.style.width = scale < 1 ? `${100 / scale}%` : "";
+      // The layout box keeps the natural height after a transform; trim it so centring measures the drawn size.
+      i.style.height = scale < 1 ? `${natural * scale}px` : "";
     };
     const ro = new ResizeObserver(fit);
     ro.observe(o);
@@ -305,7 +308,7 @@ export function Fit({ children }: { children: ReactNode }) {
     };
   }, []);
   return (
-    <div ref={outer} style={{ height: "100%", overflow: "hidden" }}>
+    <div ref={outer} style={{ height: "100%", overflow: "hidden", display: center ? "grid" : undefined, alignContent: center ? "center" : undefined }}>
       <div ref={inner} style={{ transformOrigin: "0 0" }}>
         {children}
       </div>

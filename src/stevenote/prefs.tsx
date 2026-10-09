@@ -16,7 +16,7 @@ export type Prefs = {
   counter: "hover" | "always" | "never";
   progress: boolean;
   hideCursor: boolean;
-  letterbox: "black" | "stage";
+  letterbox: "deck" | "black" | "stage";
   typeScale: 0.9 | 1 | 1.1 | 1.2;
   hurry: boolean;
   reviewFlags: boolean;
@@ -32,7 +32,7 @@ export const defaultPrefs: Prefs = {
   counter: "hover",
   progress: false,
   hideCursor: true,
-  letterbox: "black",
+  letterbox: "deck",
   typeScale: 1,
   hurry: false,
   reviewFlags: true,
@@ -41,12 +41,17 @@ export const defaultPrefs: Prefs = {
 };
 
 const KEY = "stevenote:prefs";
+/** Bumped when a saved value needs translating; saved prefs carry it as `_v`. */
+const VERSION = 2;
 
 export function loadPrefs(): Prefs {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return defaultPrefs;
-    return { ...defaultPrefs, ...(JSON.parse(raw) as Partial<Prefs>), hurry: false, gridOverlay: false };
+    const saved = JSON.parse(raw) as Partial<Prefs> & { _v?: number };
+    // Before v2 "black" was the only letterbox default, saved with everything else: it meant "as authored".
+    if (!saved._v && saved.letterbox === "black") saved.letterbox = "deck";
+    return { ...defaultPrefs, ...saved, hurry: false, gridOverlay: false };
   } catch {
     return defaultPrefs;
   }
@@ -54,7 +59,7 @@ export function loadPrefs(): Prefs {
 
 export function savePrefs(p: Prefs) {
   try {
-    localStorage.setItem(KEY, JSON.stringify({ ...p, hurry: undefined, gridOverlay: undefined }));
+    localStorage.setItem(KEY, JSON.stringify({ ...p, hurry: undefined, gridOverlay: undefined, _v: VERSION }));
   } catch {}
 }
 
@@ -68,7 +73,7 @@ export const PREF_ROWS: Row[] = [
   { key: "counter", label: "Slide counter", values: ["hover", "always", "never"], show: (v) => String(v) } as Row<"counter">,
   { key: "progress", label: "Progress bar", values: [false, true], show: (v) => (v ? "shown" : "hidden") } as Row<"progress">,
   { key: "hideCursor", label: "Hide idle cursor", values: [true, false], show: (v) => (v ? "on" : "off") } as Row<"hideCursor">,
-  { key: "letterbox", label: "Letterbox", values: ["black", "stage"], show: (v) => (v === "stage" ? "stage colour" : "black") } as Row<"letterbox">,
+  { key: "letterbox", label: "Letterbox", values: ["deck", "black", "stage"], show: (v) => (v === "deck" ? "as authored" : v === "stage" ? "stage colour" : "black") } as Row<"letterbox">,
   { key: "typeScale", label: "Type size", values: [0.9, 1, 1.1, 1.2], show: (v) => `${Math.round(Number(v) * 100)}%` } as Row<"typeScale">,
   { key: "hurry", label: "Hurry mode", values: [false, true], show: (v) => (v ? "on: skipping marked slides" : "off") } as Row<"hurry">,
   { key: "reviewFlags", label: "Review flags", values: [true, false], show: (v) => (v ? "shown" : "hidden") } as Row<"reviewFlags">,

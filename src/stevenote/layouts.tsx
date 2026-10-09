@@ -176,7 +176,7 @@ export function LiveFrame({ title, subtitle, children }: { title?: ReactNode; su
         </div>
       )}
       <div data-live style={{ flex: 1, minHeight: 0 }}>
-        <Fit>{children}</Fit>
+        <Fit fill>{children}</Fit>
       </div>
     </div>
   );
@@ -275,8 +275,11 @@ export function List({ title, items, icons, numbered = false, span = 10, stepped
  * Scales its content down (never up) so it always fits the height it is given. For live components that
  * grow as they answer: the stage stays clean whatever the model says. Width stays full after scaling.
  */
-/** Scales its content down to fit the height it is given. `center` keeps the (scaled) content in the vertical middle. */
-export function Fit({ children, center = false }: { children: ReactNode; center?: boolean }) {
+/**
+ * Scales its content down to fit the height it is given. `center` keeps the (scaled) content in the vertical
+ * middle; `fill` gives the content the whole height to lay out in, so a board can reach the bottom of the stage.
+ */
+export function Fit({ children, center = false, fill = false }: { children: ReactNode; center?: boolean; fill?: boolean }) {
   const outer = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -309,7 +312,7 @@ export function Fit({ children, center = false }: { children: ReactNode; center?
   }, []);
   return (
     <div ref={outer} style={{ height: "100%", overflow: "hidden", display: center ? "grid" : undefined, alignContent: center ? "center" : undefined }}>
-      <div ref={inner} style={{ transformOrigin: "0 0" }}>
+      <div ref={inner} style={{ transformOrigin: "0 0", height: fill ? "100%" : undefined }}>
         {children}
       </div>
     </div>

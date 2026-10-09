@@ -43,6 +43,8 @@ export type DeckDef = {
   theme?: Theme;
   transition?: TransitionName;
   style?: CSSProperties;
+  /** What surrounds the 16:9 stage on a wider screen: black, or the current slide's own background. Default black. */
+  letterbox?: "black" | "stage";
   /** Whole-talk budget in seconds, for the pace indicator. */
   totalTime?: number;
 };

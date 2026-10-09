@@ -40,12 +40,13 @@ export function Stage({
   const current = deck.slides[state.slide];
   const authoredTheme = current?.theme ?? deck.theme ?? "light";
   const theme = prefs && prefs.theme !== "deck" ? prefs.theme : authoredTheme;
+  const letterbox = prefs && prefs.letterbox !== "deck" ? prefs.letterbox : (deck.letterbox ?? "black");
   const style = { ...(deck.style ?? {}), ...(current?.style ?? {}), ...(prefs ? { "--sn-type-scale": prefs.typeScale } : {}) } as CSSProperties;
   const window = preview ? [state.slide] : [state.slide - 1, state.slide, state.slide + 1];
 
   return (
     <DeckContext.Provider value={{ deck, state, stepCounts }}>
-      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined} data-letterbox={prefs?.letterbox}>
+      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined} data-letterbox={letterbox}>
         <div className="sn-stage" data-theme={theme} data-chrome={chrome || undefined} data-counter={prefs?.counter} data-dim={prefs ? String(prefs.dimVideo) : undefined} style={style}>
           {window.map((i) => {
             const slide = deck.slides[i];

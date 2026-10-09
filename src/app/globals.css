@@ -145,6 +145,36 @@
 /* live components written for a rem-based app: a base size inside the stage */
 .dq { font-size: 17px; line-height: 1.5; height: 100%; }
 .dq * { border-color: var(--border); }
+/*
+ * A Markdown document on a slide (decks' ScrollDoc). The stage strips margins and balances headings, so the blocks get
+ * their rhythm back here: ragged-right text on a readable measure, a three-step heading scale, quiet rules and tables.
+ */
+.sn-stage .sn-doc { text-align: left; }
+.sn-stage .sn-doc :is(h1, h2, h3, h4, p, li, td, th) { text-wrap: pretty; text-align: left; }
+.sn-stage .sn-doc :is(h1, h2, h3, h4, p, ul, ol, blockquote) { max-width: 36em; }
+.sn-stage .sn-doc h1 { font-size: var(--sn-step-2); line-height: var(--sn-lh-2); margin-bottom: calc(var(--sn-base) * 1.5); }
+.sn-stage .sn-doc h2 { font-size: var(--sn-step-1); line-height: var(--sn-lh-1); margin-top: calc(var(--sn-base) * 3); margin-bottom: calc(var(--sn-base) * 1); }
+.sn-stage .sn-doc :is(h3, h4) { font-size: var(--sn-step-0); line-height: var(--sn-lh-0); margin-top: calc(var(--sn-base) * 2); margin-bottom: calc(var(--sn-base) * 0.5); }
+.sn-stage .sn-doc > :is(h1, h2, h3):first-child { margin-top: 0; }
+.sn-stage .sn-doc :is(p, ul, ol, table, pre, blockquote) { margin-bottom: calc(var(--sn-base) * 1); }
+.sn-stage .sn-doc :is(ul, ol) { margin-left: 0; padding-left: 1.5em; list-style-position: outside; }
+.sn-stage .sn-doc li { margin-bottom: calc(var(--sn-base) * 0.5); padding-left: 0.2em; }
+.sn-stage .sn-doc li::marker { color: var(--sn-muted); }
+/* Task items: the box hangs in the margin, so a wrapped line starts under the text, not under the box. */
+.sn-stage .sn-doc li:has(> input[type="checkbox"]) { list-style: none; position: relative; margin-left: -1.5em; padding-left: 1.5em; }
+.sn-stage .sn-doc li > input[type="checkbox"] { position: absolute; left: 0; top: 0.3em; margin: 0; accent-color: var(--sn-fg); }
+.sn-stage .sn-doc strong { color: var(--sn-fg); font-weight: 600; }
+.sn-stage .sn-doc a { color: var(--sn-fg); text-decoration-color: var(--sn-muted); text-underline-offset: 0.15em; }
+.sn-stage .sn-doc hr { border: 0; border-top: 1px solid var(--sn-rule); margin: calc(var(--sn-base) * 2.5) 0; }
+.sn-stage .sn-doc blockquote { border-left: 2px solid var(--sn-rule); padding-left: 1em; color: var(--sn-muted); }
+.sn-stage .sn-doc :not(pre) > code { font-size: 0.88em; padding: 0.1em 0.4em; border-radius: 0.3em; background: color-mix(in oklch, var(--sn-fg) 8%, transparent); }
+.sn-stage .sn-doc pre { font-size: 0.85em; line-height: 1.5; padding: 1em 1.2em; border-radius: 0.6em; background: color-mix(in oklch, var(--sn-fg) 5%, transparent); overflow-x: auto; }
+.sn-stage .sn-doc table { font-size: var(--sn-step--1); line-height: var(--sn-lh--1); width: 100%; border-collapse: collapse; }
+.sn-stage .sn-doc :is(th, td) { padding: 0.5em 0.9em; border-bottom: 1px solid var(--sn-rule); vertical-align: top; }
+.sn-stage .sn-doc th { color: var(--sn-muted); font-weight: 500; }
+/* Streamdown boxes each table in a bordered, 300px-high scroller; on a slide the page itself scrolls. */
+.sn-stage .sn-doc div:has(> table) { border: 0; background: none; max-height: none !important; overflow: visible auto; margin-bottom: calc(var(--sn-base) * 1); }
+.sn-stage .sn-doc td code { white-space: nowrap; }
 
 html, body { height: 100%; }
 body {
@@ -369,7 +399,9 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-cursor-hidden .sn-counter { opacity: 0; }
 .sn-stage[data-counter="always"] .sn-counter, .sn-cursor-hidden .sn-stage[data-counter="always"] .sn-counter { opacity: 1; }
 .sn-stage[data-counter="never"] .sn-counter, .sn-stage[data-counter="never"]:hover .sn-counter { opacity: 0; }
+/* The surround follows the slide: --sn-bg here is the root's (light); the dark stage's value is set on the stage itself, so repeat it. */
 .sn-viewport[data-letterbox="stage"] { background: var(--sn-bg); }
+.sn-viewport[data-letterbox="stage"]:has(> .sn-stage[data-theme="dark"]) { background: oklch(10% 0 0); }
 .sn-stage[data-dim="false"] .sn-slide[data-focus="true"] .sn-slide-inner :is(h1, h2, h3, p, li, figcaption, [data-dim]) { opacity: 1; }
 .sn-blank { position: absolute; inset: 0; z-index: 40; background: black; }
 .sn-blank[data-color="white"] { background: white; }

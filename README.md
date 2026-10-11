@@ -84,16 +84,50 @@ While a video plays, everything else on the slide dims to 28 percent, so the eye
 
 ## Private decks
 
-Deck content and the server routes it needs live in a separate private repo with this shape:
+Deck content and the server routes it needs live in a separate repo, kept out of this one. Start from the
+template, which has a first deck and the review route:
+
+```
+git clone https://github.com/diklein/stevenote-decks-template.git my-decks
+npm run link-private -- ../my-decks
+```
+
+The shape:
 
 ```
 src/decks.ts        export const privateDecks: Record<string, DeckDef>
 src/api.ts          export const privateRoutes: Record<string, { GET?, POST? }>   served at /api/private/<path>
 src/<deck>/...      slides, components, notes
 public/...          media, served at /private/<path>
+review/             per-slide feedback and approvals, written by the review route
 ```
 
-Mount it with `npm run link-private -- ../my-decks` (a gitignored symlink at `src/private`). Secrets go in `.env.local`. Without a private repo the app builds with stubs.
+`link-private` symlinks `src/private` and `public/private` here to the decks repo and gives it this app's
+`node_modules`. Without a decks repo, install writes stubs so the app builds with only the example deck.
+
+## Set up with Claude Code
+
+Paste this into Claude Code in an empty folder:
+
+```
+Set up Stevenote for me. It is a presentation tool where slides are React
+components and the deck is a Next.js app: https://github.com/diklein/stevenote
+
+1. Clone it into ./stevenote, run npm install, then npm run dev. Open
+   http://localhost:3000 and confirm the "example" deck loads.
+2. Read README.md and skills/deck-craft/SKILL.md before writing any slide.
+   Use the deck-craft skill for story, slide composition and speaker notes.
+3. Clone https://github.com/diklein/stevenote-decks-template.git into
+   ./my-decks and mount it: cd stevenote && npm run link-private -- ../my-decks
+   Deck content goes there, never in the stevenote repo.
+4. Build my first deck from [a doc, README, outline or Keynote file, or a
+   description of the talk]. Copy src/hello, change the id, register it in
+   src/decks.ts. Speaker notes go in notes.say as talking points, one line
+   per bullet, with notes.time in seconds.
+5. Show me the deck at http://localhost:3000/decks/<id>, tell me to press S
+   for the notes window and ? for the keys, and wait for my feedback. Do not
+   push anything.
+```
 
 ## Review
 

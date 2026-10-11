@@ -9,12 +9,17 @@ export type SlideContextValue = {
   active: boolean;
   /** True inside the notes window's thumbnails. Effects, autoplay and fetches should stay quiet. */
   preview: boolean;
+  /**
+   * True in the notes window's live view of the current slide: it animates, plays video and takes clicks like
+   * the stage, and a click that steps the deck goes to the deck. Anything that talks to a server stays quiet.
+   */
+  mirror: boolean;
   index: number;
   /** Dim everything on the slide except the element marked data-focus-target. */
   setFocus: (on: boolean) => void;
 };
 
-export const SlideContext = createContext<SlideContextValue>({ active: true, preview: false, index: 0, setFocus: () => {} });
+export const SlideContext = createContext<SlideContextValue>({ active: true, preview: false, mirror: false, index: 0, setFocus: () => {} });
 
 export function useSlide() {
   return useContext(SlideContext);

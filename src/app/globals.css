@@ -410,7 +410,7 @@ html[data-sn-motion="reduced"] [data-step] { transition: opacity 120ms linear; t
 .sn-cursor-hidden, .sn-cursor-hidden * { cursor: none !important; }
 
 /* ---- notes window ---- */
-.sn-notes { min-height: 100dvh; background: oklch(10% 0 0); color: white; padding: 2rem; display: grid; gap: 1.5rem; grid-template-rows: auto 1fr auto; }
+.sn-notes { min-height: 100dvh; background: oklch(10% 0 0); color: white; padding: 2rem; display: grid; gap: 1.5rem; grid-template-rows: auto 1fr; }
 .sn-notes .preview { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 0.6rem; background: black; }
 .sn-notes .preview > .sn-viewport { position: absolute; inset: 0; }
 .sn-notes .preview .sn-stage { width: 100%; }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, useCallback, useEffect, useState, type ReactNode } from "react";
+import { Component, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useSlide } from "./context";
 import { Video } from "./video";
 
@@ -15,14 +15,20 @@ export function Live({
   check,
   children,
   label = "live",
+  triggers = [],
+  still,
 }: {
   backup?: { src: string; poster?: string };
   /** Runs when the slide becomes active. Reject to fall back. */
   check?: () => Promise<unknown>;
   children: ReactNode;
   label?: string;
+  /** Controls the notes window can press for the presenter; the component answers them with useTriggers. */
+  triggers?: string[];
+  /** A picture of the component for the notes window, where it is not run. */
+  still?: string;
 }) {
-  const { active, preview, index } = useSlide();
+  const { active, preview, mirror, index } = useSlide();
   const [mode, setMode] = useState<"live" | "backup">("live");
   const [reason, setReason] = useState<string | null>(null);
 
@@ -37,15 +43,15 @@ export function Live({
   );
 
   useEffect(() => {
-    if (preview || !backup) return;
+    if (preview || mirror || !backup) return;
     window.dispatchEvent(new CustomEvent("stevenote:backup-available", { detail: { slide: index, available: true } }));
     return () => {
       window.dispatchEvent(new CustomEvent("stevenote:backup-available", { detail: { slide: index, available: false } }));
     };
-  }, [preview, backup, index]);
+  }, [preview, mirror, backup, index]);
 
   useEffect(() => {
-    if (!active || preview || !check || mode === "backup") return;
+    if (!active || preview || mirror || !check || mode === "backup") return;
     let cancelled = false;
     check().catch((e: unknown) => {
       if (!cancelled) fallBack(e instanceof Error ? e.message : "health check failed");
@@ -54,10 +60,10 @@ export function Live({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, preview]);
+  }, [active, preview, mirror]);
 
   useEffect(() => {
-    if (!active || preview || !backup) return;
+    if (!active || preview || mirror || !backup) return;
     const onToggle = () => {
       setMode((m) => (m === "live" ? "backup" : "live"));
       setReason((r) => (mode === "live" ? "switched by hand" : r));
@@ -65,7 +71,29 @@ export function Live({
     };
     window.addEventListener("stevenote:toggle-backup", onToggle);
     return () => window.removeEventListener("stevenote:toggle-backup", onToggle);
-  }, [active, preview, backup, mode, index, label]);
+  }, [active, preview, mirror, backup, mode, index, label]);
+
+  // A component with a health check talks to a server: the notes window shows its name instead of a second copy,
+  // with a button for each control the component offers, pressed on the stage through the deck.
+  if (mirror && check) {
+    return (
+      <div className="muted" style={{ position: "relative", height: "100%", border: still ? undefined : "1px dashed var(--sn-rule)", borderRadius: "var(--sn-radius)", overflow: "hidden", display: "grid", placeItems: "center", alignContent: "center", gap: "2cqi", fontSize: "var(--sn-step-0)" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {still && <img src={still} alt={`${label}, as it looks when it has run`} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "contain", opacity: 0.9 }} />}
+        {!still && <span>live: {label}</span>}
+        {triggers.map((t) => (
+          <button
+            key={t}
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent("stevenote:nav", { detail: { action: "trigger", label: t } }))}
+            style={{ position: "relative", font: "inherit", fontSize: "var(--sn-step-1)", fontWeight: 500, color: "var(--sn-bg)", background: "var(--sn-fg)", border: 0, borderRadius: "999px", padding: "1cqi 3cqi", cursor: "pointer", boxShadow: "0 1cqi 3cqi oklch(0% 0 0 / 0.4)" }}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   if (mode === "backup" && backup) {
     return (
@@ -80,6 +108,24 @@ export function Live({
       {children}
     </LiveBoundary>
   );
+}
+
+/**
+ * Answer the notes window's trigger buttons: `handlers` maps each label a Live lists in `triggers` to what pressing
+ * it does on the stage. Only the slide on screen answers, so a trigger never fires twice.
+ */
+export function useTriggers(handlers: Record<string, () => void>) {
+  const { active, preview, mirror } = useSlide();
+  const ref = useRef(handlers);
+  useEffect(() => {
+    ref.current = handlers;
+  });
+  useEffect(() => {
+    if (!active || preview || mirror) return;
+    const on = (e: Event) => ref.current[(e as CustomEvent<string>).detail]?.();
+    window.addEventListener("stevenote:trigger", on);
+    return () => window.removeEventListener("stevenote:trigger", on);
+  }, [active, preview, mirror]);
 }
 
 class LiveBoundary extends Component<{ children: ReactNode; onError: (e: Error) => void; hasBackup: boolean }, { error: Error | null }> {

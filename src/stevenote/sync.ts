@@ -11,7 +11,11 @@ export type NavAction =
   | { action: "prev" }
   | { action: "goto"; slide: number; step?: number }
   | { action: "blank"; color: "black" | "white" | null }
-  | { action: "toggleBlank" };
+  | { action: "toggleBlank" }
+  /** Press a named control on the slide's live component, from the notes window. */
+  | { action: "trigger"; label: string }
+  /** Pause, play or scrub the slide's video (one with `controls`), from the notes window. */
+  | { action: "video"; op: "toggle" | "seek"; by?: number };
 
 export type SyncMessage =
   | { type: "hello"; from: "notes" | "deck" }

@@ -22,9 +22,14 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
   const [state, setState] = useState<DeckState>(() => ({ ...initialState, ...(parseHash(window.location.hash, deck.slides.length) ?? {}) }));
   const [stepCounts, setStepCounts] = useState<Record<number, number>>({});
 
-  // The tab is named after the deck. Decks defined in client modules are opaque to server metadata.
+  // The tab is named after the deck. Decks defined in client modules are opaque to server metadata, and the
+  // App Router writes its own <title> again during hydration, so the deck's name is re-applied whenever it changes.
   useEffect(() => {
-    document.title = deck.title;
+    const apply = () => { if (document.title !== deck.title) document.title = deck.title; };
+    apply();
+    const observer = new MutationObserver(apply);
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
   }, [deck.title]);
   const [help, setHelp] = useState(false);
   const [prefs, setPrefs] = usePrefs();
@@ -162,6 +167,10 @@ export function Deck({ deck, notesPath }: { deck: DeckDef; notesPath: string }) 
           return apply({ ...stateRef.current, blank: nav.color });
         case "toggleBlank":
           return apply({ ...stateRef.current, blank: stateRef.current.blank ? null : "black" });
+        case "trigger":
+          return window.dispatchEvent(new CustomEvent("stevenote:trigger", { detail: nav.label }));
+        case "video":
+          return window.dispatchEvent(new CustomEvent("stevenote:video", { detail: nav }));
       }
     },
     [apply, goto, next, prev],

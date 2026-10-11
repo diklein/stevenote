@@ -30,6 +30,7 @@ export const talk: DeckDef = {
   title: "My talk",
   theme: "light",          // or "dark"; each slide may override
   transition: "fade",      // each slide may override
+  letterbox: "stage",      // the surround on a wide screen: "black" (default) or the slide's own colour
   slides: [
     {
       id: "open",
@@ -49,11 +50,11 @@ Builds: wrap anything in `<Step>` (document order) or `<Step at={3}>`; `<Steps>`
 
 Morph: give an element `<Morph name="title">` on two consecutive slides and set the second slide's transition to `morph`.
 
-Video: `<Video src poster chapters={[{ at: 0, label }, { at: 12, label }]} />`. Each chapter after the first is a click. It plays on entry, pauses on exit and holds the last frame.
+Video: `<Video src poster chapters={[{ at: 0, label }, { at: 12, label }]} />`. Each chapter after the first is a click. It plays on entry, pauses on exit and holds the last frame. `loop` keeps a short clip moving for as long as the slide is up. `controls` makes the picture clickable: a click pauses or resumes, a slim scrubber appears along the bottom edge while the pointer is over it or the video is paused, and K, J and L pause, scrub back and scrub forward.
 
 Tokens: override per slide with `style={{ "--sn-bg": "oklch(35% 0.12 260)" }}`. The type scale is `--sn-step--1` through `--sn-step-6`.
 
-Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per click). Slides marked `skippable` are hidden in hurry mode; slides marked `bonus` sit after the end for questions.
+Notes: `say`, `do`, `time` in seconds, and optional `steps` (one say-chunk per click). A `say` with line breaks is talking points: the notes window shows one bullet per line, and a single line stays a paragraph. Slides marked `skippable` are hidden in hurry mode; slides marked `bonus` sit after the end for questions.
 
 ## The grid
 
@@ -76,6 +77,8 @@ scripts/record-backup.sh "http://localhost:3000/decks/talk#/12" public/decks/tal
 ```
 
 It opens the slide fullscreen in a clean Chrome, counts down, records the screen at 60 fps while you run the demo, stops on Enter, crops to the stage and writes the mp4 and a poster.
+
+The notes window mirrors the current slide live: it animates, plays video and takes clicks, so a prototype stepped there steps the deck. A `<Live>` component is not mounted twice; in the notes window it shows a placeholder with a button per entry in `triggers`, and an optional `still` image. Pressing a button fires the same handler on the deck through `useTriggers({ "Stock check": () => ask() })` inside the component.
 
 While a video plays, everything else on the slide dims to 28 percent, so the eye goes to the moving picture. Turn it off per video with `dimWhilePlaying={false}`.
 
@@ -113,6 +116,7 @@ Press `/` on any slide for a feedback panel. Esc closes and keeps the draft; ⌘
 | digits, Enter | jump to a slide |
 | minus | hurry mode (skips `skippable` slides) |
 | X | swap a live component for its backup video |
+| K, J, L | pause or play a video with `controls`, scrub it five seconds back or forward |
 | comma | preferences: transition and theme overrides, motion, video dimming, counter, cursor, letterbox, type size, hurry mode |
 | slash, A, Shift+A | feedback panel, approve this slide, show or hide review flags |
 | G | grid overlay |
@@ -121,7 +125,7 @@ Press `/` on any slide for a feedback panel. Esc closes and keeps the draft; ⌘
 
 Space and Enter on a focused button inside a slide click the button. Keys inside inputs and editors are left alone. Add `data-keyboard-owner` to an element to keep every key.
 
-Notes window: arrows and Space drive the deck, B blanks, R resets the timer, plus and minus change the text size.
+Notes window: arrows and Space drive the deck, B blanks, R or the Reset button restarts the timer, plus and minus change the text size.
 
 ## Present over Zoom
 

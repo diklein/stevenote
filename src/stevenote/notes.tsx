@@ -60,6 +60,8 @@ export function Notes({ deck }: { deck: DeckDef }) {
         setBackups(m.backups ?? {});
         setConnected(true);
       } else if (m.type === "hello" && m.from === "deck") {
+        // A deck that just (re)loaded counts from zero again: follow it from its first message.
+        seq.current = 0;
         ch.postMessage({ type: "hello", from: "notes" } satisfies SyncMessage);
       }
     };
@@ -71,6 +73,13 @@ export function Notes({ deck }: { deck: DeckDef }) {
       window.clearInterval(tick);
     };
   }, [deck.id]);
+
+  /** Starts the talk clock from now, in this window and on the deck. The R key and the Reset button both do this. */
+  const resetTimer = useCallback(() => {
+    const t0 = Date.now();
+    setStartedAt(t0);
+    channel.current?.postMessage({ type: "timer", startedAt: t0 } satisfies SyncMessage);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -85,15 +94,24 @@ export function Notes({ deck }: { deck: DeckDef }) {
       } else if (e.key === "b" || e.key === "B" || e.key === ".") send({ action: "toggleBlank" });
       else if (e.key === "+" || e.key === "=") bump(0.1);
       else if (e.key === "-" || e.key === "_") bump(-0.1);
-      else if (e.key === "r" || e.key === "R") {
-        const t0 = Date.now();
-        setStartedAt(t0);
-        channel.current?.postMessage({ type: "timer", startedAt: t0 } satisfies SyncMessage);
-      }
+      else if (e.key === "r" || e.key === "R") resetTimer();
+      else if (e.key === "k" || e.key === "K") send({ action: "video", op: "toggle" });
+      else if (e.key === "j" || e.key === "J") send({ action: "video", op: "seek", by: -5 });
+      else if (e.key === "l" || e.key === "L") send({ action: "video", op: "seek", by: 5 });
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [bump, send]);
+    // A prototype in the live view asks to step the deck the same way it does on stage.
+    const onNav = (e: Event) => {
+      const d = (e as CustomEvent<"next" | "prev" | NavAction>).detail;
+      if (d === "next" || d === "prev") send({ action: d });
+      else if (d && typeof d === "object" && d.action === "trigger") send(d);
+    };
+    window.addEventListener("stevenote:nav", onNav);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("stevenote:nav", onNav);
+    };
+  }, [bump, send, resetTimer]);
 
   const slide = deck.slides[state.slide];
   const count = stepCounts[state.slide] ?? 0;
@@ -102,12 +120,8 @@ export function Notes({ deck }: { deck: DeckDef }) {
     if (state.slide + 1 < deck.slides.length) return { slide: state.slide + 1, step: 0, blank: null };
     return null;
   }, [state, count, deck.slides.length]);
-  const nextSlide = nextState ? deck.slides[nextState.slide] : null;
 
-  const budget = useMemo(() => deck.slides.slice(0, state.slide).reduce((a, s) => a + (s.notes?.time ?? 0), 0), [deck, state.slide]);
   const elapsed = startedAt ? Math.floor((now - startedAt) / 1000) : 0;
-  const pace = startedAt && budget > 0 ? elapsed - budget : 0;
-  const paceColor = !startedAt ? "oklch(70% 0 0)" : pace > 45 ? "oklch(75% 0.18 25)" : pace < -45 ? "oklch(75% 0.12 240)" : "oklch(80% 0.17 150)";
   const clock = new Date(now).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   const say = slide?.notes?.steps?.[state.step] ?? slide?.notes?.say;
 
@@ -122,12 +136,12 @@ export function Notes({ deck }: { deck: DeckDef }) {
           {alerts[state.slide] && <span style={{ marginLeft: "1em", color: "oklch(75% 0.18 25)" }}>{alerts[state.slide]}</span>}
           {!connected && <span style={{ marginLeft: "1em", color: "oklch(75% 0.18 25)" }}>waiting for the deck</span>}
         </span>
-        <span style={{ fontFamily: "var(--sn-font-mono)", fontVariantNumeric: "tabular-nums", fontSize: "1.6em", color: paceColor }}>
+        <span style={{ fontFamily: "var(--sn-font-mono)", fontVariantNumeric: "tabular-nums", fontSize: "1.6em", color: startedAt ? "oklch(92% 0 0)" : "oklch(70% 0 0)" }}>
           {fmt(elapsed)}
-          {budget > 0 && <span style={{ fontSize: "0.5em", marginLeft: "0.8em", color: "oklch(60% 0 0)" }}>plan {fmt(budget)}</span>}
         </span>
         <span style={{ fontFamily: "var(--sn-font-mono)", fontVariantNumeric: "tabular-nums" }}>{clock}</span>
         <span style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" onClick={resetTimer} aria-label="Reset the timer" title="Reset the timer (R)" style={btn}>Reset</button>
           <button type="button" onClick={() => bump(-0.1)} aria-label="Smaller text" style={btn}>A−</button>
           <button type="button" onClick={() => bump(0.1)} aria-label="Larger text" style={btn}>A+</button>
         </span>
@@ -135,12 +149,22 @@ export function Notes({ deck }: { deck: DeckDef }) {
 
       <section style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", minHeight: 0 }}>
         <div style={{ display: "grid", gridTemplateRows: "auto 1fr", gap: "1rem", minHeight: 0 }}>
+          {/* The live view: it animates, plays and takes clicks; a click that steps a prototype steps the deck. */}
           <div className="preview">
-            <Stage deck={deck} state={{ ...state, blank: null }} stepCounts={stepCounts} preview />
+            <Stage deck={deck} state={{ ...state, blank: null }} stepCounts={stepCounts} mirror />
           </div>
           <div style={{ overflowY: "auto" }}>
-            <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)" }}>Say</p>
-            <p style={{ fontSize: "1.9em", lineHeight: 1.3, letterSpacing: "-0.01em", marginTop: "0.3em" }}>{say ?? <span style={{ color: "oklch(45% 0 0)" }}>No notes for this slide.</span>}</p>
+            {/* Notes with line breaks are talking points: one bullet per line. */}
+            {say &&
+              (say.includes("\n") ? (
+                <ul style={{ fontSize: "1.9em", lineHeight: 1.3, letterSpacing: "-0.01em", margin: 0, paddingLeft: "1em", display: "grid", gap: "0.4em", listStyle: "disc" }}>
+                  {say.split("\n").filter(Boolean).map((line, i) => (
+                    <li key={i}>{line}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ fontSize: "1.9em", lineHeight: 1.3, letterSpacing: "-0.01em" }}>{say}</p>
+              ))}
             {slide?.notes?.do && (
               <>
                 <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)", marginTop: "1.2em" }}>Do</p>
@@ -154,30 +178,16 @@ export function Notes({ deck }: { deck: DeckDef }) {
           <div className="preview" style={{ opacity: 0.85 }}>
             {nextState ? <Stage deck={deck} state={nextState} stepCounts={stepCounts} preview /> : <div style={{ display: "grid", placeItems: "center", height: "100%", color: "oklch(50% 0 0)" }}>End of deck</div>}
           </div>
-          <div>
-            <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)" }}>On screen</p>
-            <p style={{ fontSize: "1.1em", color: "oklch(85% 0 0)", marginTop: "0.2em" }}>{slide?.title ?? slide?.id}</p>
-            {slide?.notes?.time && <p style={{ fontSize: "0.9em", color: "oklch(60% 0 0)", marginTop: "0.4em" }}>about {slide.notes.time}s</p>}
-            {slide && review[slide.id]?.approved && <p style={{ fontSize: "0.9em", color: "oklch(75% 0.15 150)", marginTop: "0.4em" }}>✓ approved</p>}
-            {slide && review[slide.id]?.feedback?.trim() && (
-              <>
-                <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)", marginTop: "1em" }}>Feedback</p>
-                <p style={{ fontSize: "0.95em", color: "oklch(85% 0.12 80)", marginTop: "0.2em", whiteSpace: "pre-wrap" }}>{review[slide.id].feedback}</p>
-              </>
-            )}
-            {nextSlide && (
-              <>
-                <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)", marginTop: "1em" }}>Then</p>
-                <p style={{ fontSize: "1em", color: "oklch(75% 0 0)", marginTop: "0.2em" }}>{nextSlide.title ?? nextSlide.id}</p>
-              </>
-            )}
-          </div>
+          {/* Under the next-slide preview: only open review feedback. The slide's title, time and status stay out of the way. */}
+          {slide && review[slide.id]?.feedback?.trim() && (
+            <div>
+              <p style={{ fontSize: "0.85em", color: "oklch(55% 0 0)" }}>Feedback</p>
+              <p style={{ fontSize: "0.95em", color: "oklch(85% 0.12 80)", marginTop: "0.2em", whiteSpace: "pre-wrap" }}>{review[slide.id].feedback}</p>
+            </div>
+          )}
         </div>
       </section>
 
-      <footer style={{ borderTop: "1px solid oklch(25% 0 0)", paddingTop: "0.8rem", fontSize: "0.8em", color: "oklch(50% 0 0)" }}>
-        Arrows and Space move the deck. B blanks it. R resets the timer. Plus and minus change the text size.
-      </footer>
     </main>
   );
 }

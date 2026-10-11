@@ -46,6 +46,8 @@ export const BINDINGS: Binding[] = [
   { command: "notes", keys: k("s", "S", "N"), show: [["S"]], label: "Speaker notes window", group: "present" },
   { command: "hurry", keys: k("-", "_"), show: [["-"]], label: "Hurry mode: skip marked slides", group: "present" },
   { command: "backup", keys: k("x", "X"), show: [["X"]], label: "Swap a live demo for its backup video", group: "present" },
+  { show: [["K"]], label: "Pause or play a video with controls", group: "present" },
+  { show: [["J"], ["L"]], label: "Scrub a video five seconds back or forward", group: "present" },
 
   { command: "overview", keys: k("o", "O"), show: [["O"]], label: "All slides", group: "review" },
   { command: "review", keys: k("/"), show: [["/"]], label: "Feedback on this slide", group: "review" },

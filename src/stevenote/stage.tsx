@@ -17,6 +17,7 @@ export function Stage({
   stepCounts,
   onStepCount,
   preview = false,
+  mirror = false,
   chrome = false,
   embedded = false,
   animate = false,
@@ -28,6 +29,8 @@ export function Stage({
   stepCounts: Record<number, number>;
   onStepCount?: (slide: number, count: number) => void;
   preview?: boolean;
+  /** The notes window's live view: one slide, no transitions, but animating, playing and clickable. */
+  mirror?: boolean;
   chrome?: boolean;
   /** Render inside the page flow instead of filling the viewport. */
   embedded?: boolean;
@@ -42,18 +45,18 @@ export function Stage({
   const theme = prefs && prefs.theme !== "deck" ? prefs.theme : authoredTheme;
   const letterbox = prefs && prefs.letterbox !== "deck" ? prefs.letterbox : (deck.letterbox ?? "black");
   const style = { ...(deck.style ?? {}), ...(current?.style ?? {}), ...(prefs ? { "--sn-type-scale": prefs.typeScale } : {}) } as CSSProperties;
-  const window = preview ? [state.slide] : [state.slide - 1, state.slide, state.slide + 1];
+  const window = preview || mirror ? [state.slide] : [state.slide - 1, state.slide, state.slide + 1];
 
   return (
     <DeckContext.Provider value={{ deck, state, stepCounts }}>
-      <div className="sn-viewport" data-preview={preview || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined} data-letterbox={letterbox}>
+      <div className="sn-viewport" data-preview={preview || mirror || undefined} data-embedded={embedded || undefined} data-animate={animate || undefined} data-letterbox={letterbox}>
         <div className="sn-stage" data-theme={theme} data-chrome={chrome || undefined} data-counter={prefs?.counter} data-dim={prefs ? String(prefs.dimVideo) : undefined} style={style}>
           {window.map((i) => {
             const slide = deck.slides[i];
             if (!slide) return null;
             const active = i === state.slide;
             return (
-              <SlideFrame key={slide.id} index={i} active={active} preview={preview} step={active ? state.step : i < state.slide ? (stepCounts[i] ?? 0) : 0} onStepCount={onStepCount}>
+              <SlideFrame key={slide.id} index={i} active={active} preview={preview} mirror={mirror} step={active ? state.step : i < state.slide ? (stepCounts[i] ?? 0) : 0} onStepCount={onStepCount}>
                 {slide.content}
               </SlideFrame>
             );
@@ -79,6 +82,7 @@ function SlideFrame({
   index,
   active,
   preview,
+  mirror,
   step,
   onStepCount,
   children,
@@ -86,13 +90,14 @@ function SlideFrame({
   index: number;
   active: boolean;
   preview: boolean;
+  mirror: boolean;
   step: number;
   onStepCount?: (slide: number, count: number) => void;
   children: React.ReactNode;
 }) {
   const onCount = useCallback((count: number) => onStepCount?.(index, count), [index, onStepCount]);
   const [focus, setFocus] = useState(false);
-  const ctx = useMemo(() => ({ active, preview, index, setFocus }), [active, preview, index]);
+  const ctx = useMemo(() => ({ active, preview, mirror, index, setFocus }), [active, preview, mirror, index]);
   return (
     <SlideContext.Provider value={ctx}>
       <section className="sn-slide" data-active={active} data-index={index} data-focus={focus && active ? "true" : undefined} inert={!active || preview} aria-hidden={!active}>
